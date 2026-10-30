@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 
 /**
  * URL publique du site, utilisée pour les liens absolus (Open Graph, sitemap, canonical).
- * À définir via NEXT_PUBLIC_SITE_URL dès que le domaine est confirmé.
+ * Peut être surchargée par NEXT_PUBLIC_SITE_URL (ex. environnement de recette).
  */
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://kraken.hustlerlabs.tech").replace(/\/$/, "");
 
 export const SITE = {
   name: "Kraken : Sold Out",

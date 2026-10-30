@@ -13,7 +13,6 @@ Site vitrine du défi back-end **Kraken : Sold Out** (Kraken by HustlerLabs), en
 ## Démarrer
 
 ```bash
-cp .env.example .env.local   # puis renseigner NEXT_PUBLIC_SITE_URL
 npm install
 npm run dev     # http://localhost:3000
 npm run build && npm start
@@ -56,7 +55,7 @@ src/
 - Métadonnées complètes par page via `pageMetadata()` (`src/config/site.ts`) : titre, description, canonical, Open Graph, Twitter
 - Images de partage générées au build pour chaque page (`opengraph-image.tsx` / `twitter-image.tsx`, rendu commun dans `src/lib/og.tsx`)
 - `manifest.webmanifest`, `sitemap.xml`, `robots.txt` et données structurées schema.org `Event`
-- `NEXT_PUBLIC_SITE_URL` doit pointer vers le domaine final pour que les URL absolues soient correctes
+- Domaine : `https://kraken.hustlerlabs.tech` (surchargeable par `NEXT_PUBLIC_SITE_URL`, voir `.env.example`)
 
 ## Animations
 

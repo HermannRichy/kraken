@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 
+import { BackToTop } from "@/components/layout/back-to-top";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { CHALLENGE, STEPS } from "@/config/challenge";
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <main className="flex-1 overflow-hidden">{children}</main>
         <Footer />
+        <BackToTop />
       </body>
     </html>
   );

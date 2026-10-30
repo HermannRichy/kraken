@@ -1,6 +1,7 @@
 // Icônes animées issues de lucide-animated (https://lucide-animated.com, licence MIT,
 // voir LICENSE-lucide-animated). Chaque icône expose startAnimation / stopAnimation.
 import { ArrowRightIcon } from "./arrow-right";
+import { ArrowUpIcon } from "./arrow-up";
 import { ArrowUpRightIcon } from "./arrow-up-right";
 import { CalendarDaysIcon } from "./calendar-days";
 import { CheckIcon } from "./check";
@@ -27,6 +28,7 @@ import { ZapIcon } from "./zap";
 
 export const ICONS = {
   "arrow-right": ArrowRightIcon,
+  "arrow-up": ArrowUpIcon,
   "arrow-up-right": ArrowUpRightIcon,
   "calendar-days": CalendarDaysIcon,
   check: CheckIcon,

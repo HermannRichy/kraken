@@ -221,16 +221,19 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* Bandeaux croisés */}
-      <div className="relative h-[110px] overflow-hidden border-b-[3px] border-ink bg-white lg:h-[150px]" aria-hidden="true">
+      {/* Bandeaux croisés (empilés sur mobile, croisés sur desktop) */}
+      <div
+        className="relative flex flex-col gap-5 overflow-hidden border-b-[3px] border-ink bg-white py-6 lg:block lg:h-[150px] lg:py-0"
+        aria-hidden="true"
+      >
         <Marquee
           items={["Aucune survente", "Aucun double débit", "Webhooks signés", "Reprise après panne"]}
-          className="absolute -inset-x-10 top-5 rotate-[3deg] border-y-[3px] border-ink bg-ink py-2.5 text-base font-extrabold text-white lg:top-[30px] lg:rotate-2 lg:py-3.5 lg:text-[22px]"
+          className="relative -mx-10 rotate-[1.5deg] border-y-[3px] border-ink bg-ink py-2.5 text-base font-extrabold text-white lg:absolute lg:inset-x-[-40px] lg:top-[30px] lg:mx-0 lg:rotate-2 lg:py-3.5 lg:text-[22px]"
           speed={26}
         />
         <Marquee
           items={["1 000 demandes", "1 billet", "1 seul gagnant", "La justesse avant la vitesse"]}
-          className="absolute -inset-x-10 top-11 -rotate-[3.5deg] border-y-[3px] border-ink bg-kraken py-2.5 text-base font-extrabold text-white lg:top-[58px] lg:-rotate-[2.5deg] lg:py-3.5 lg:text-[22px]"
+          className="relative -mx-10 -rotate-[1.5deg] border-y-[3px] border-ink bg-kraken py-2.5 text-base font-extrabold text-white lg:absolute lg:inset-x-[-40px] lg:top-[58px] lg:mx-0 lg:-rotate-[2.5deg] lg:py-3.5 lg:text-[22px]"
           separatorClassName="text-ink"
           reverse
           speed={22}

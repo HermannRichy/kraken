@@ -10,6 +10,7 @@ import { HoverContext } from "@/components/motion/hover";
 import { Button } from "@/components/ui/button";
 import { NAV } from "@/config/challenge";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { useScrollDirection } from "@/lib/use-scroll-direction";
 import { cn } from "@/lib/utils";
 
 import { Marquee } from "./marquee";
@@ -21,6 +22,36 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [menuHover, setMenuHover] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLElement>(null);
+  const { direction, y } = useScrollDirection();
+
+  // Referme le menu à chaque changement de page (lien, logo, bouton, retour navigateur).
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setOpen(false);
+  }
+
+  // Le menu se referme aussi si l'on redescend dans la page.
+  if (open && direction === "down" && y > 160) setOpen(false);
+
+  // En-tête masqué quand on descend, réaffiché dès qu'on remonte.
+  const hidden = direction === "down" && y > 160 && !open;
+
+  // Referme le menu : touche Échap, clic en dehors, ou en-tête qui se masque.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onClick = (e: MouseEvent) => {
+      if (root.current && !root.current.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onClick);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onClick);
+    };
+  }, [open]);
 
   useEffect(() => {
     const el = panel.current;
@@ -30,7 +61,13 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="relative z-40 bg-white">
+    <header
+      ref={root}
+      className={cn(
+        "sticky top-0 z-40 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none",
+        hidden && "-translate-y-full",
+      )}
+    >
       <Marquee
         items={TICKER}
         speed={30}
