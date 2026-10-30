@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #000000;
+  --color-paper: #f5f6f8;
+  --color-kraken: #0047ff;
+  --color-steel: #626670;
+  --color-mist: #d5d8de;
+  --color-smoke: #a9aeb8;
+  --color-graphite: #33363c;
+
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-kraken);
+    color: #ffffff;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-kraken);
+    outline-offset: 3px;
+  }
+}
+
+/* Distorsions : trapèzes arrondis en perspective (cards, stickers, blocs de titre) */
+@utility distort-a {
+  transform: perspective(1000px) rotateY(-8deg) rotateX(3deg) rotateZ(-1.5deg);
+}
+@utility distort-b {
+  transform: perspective(1000px) rotateY(7deg) rotateX(-3deg) rotateZ(1.2deg);
+}
+@utility distort-c {
+  transform: perspective(1000px) rotateY(-6deg) rotateX(-3deg) rotateZ(0.8deg);
+}
+@utility distort-d {
+  transform: perspective(1000px) rotateY(8deg) rotateX(3deg) rotateZ(-1deg);
+}
+@utility distort-e {
+  transform: perspective(1000px) rotateY(-7deg) rotateZ(1.2deg);
+}
+@utility distort-f {
+  transform: perspective(1000px) rotateY(6deg) rotateX(3deg) rotateZ(-0.8deg);
+}
+@utility distort-soft-a {
+  transform: perspective(1400px) rotateY(-4deg) rotateX(2deg) rotateZ(-0.8deg);
+}
+@utility distort-soft-b {
+  transform: perspective(1400px) rotateY(4deg) rotateX(-2deg) rotateZ(0.6deg);
+}
+@utility distort-title {
+  transform: perspective(800px) rotateY(-12deg) rotateX(4deg) rotateZ(-2.5deg);
+}
+@utility distort-hero {
+  transform: perspective(1200px) rotateY(-10deg) rotateX(6deg) rotateZ(4deg);
+}
+@utility distort-back {
+  transform: perspective(1200px) rotateY(10deg) rotateZ(-4deg);
+}
+
+/* Distorsions plus douces sur téléphone (évite les débords d'écran) */
+@media (max-width: 1023px) {
+  .distort-hero {
+    transform: perspective(1000px) rotateY(-6deg) rotateZ(2.5deg);
+  }
+  .distort-back {
+    transform: perspective(1000px) rotateY(6deg) rotateZ(-3deg);
+  }
+  .distort-title {
+    transform: perspective(800px) rotateY(-8deg) rotateZ(-2deg);
+  }
+}
+
+/* Bord déchiré des stickers noirs */
+@utility torn {
+  clip-path: polygon(4% 0, 22% 5%, 41% 0, 63% 4%, 82% 0, 100% 6%, 96% 28%, 100% 52%, 95% 74%, 100% 100%, 78% 95%, 57% 100%, 36% 94%, 15% 100%, 0 95%, 4% 72%, 0 48%, 5% 24%);
+}
+
+@utility barcode {
+  background: repeating-linear-gradient(90deg, #000 0 3px, #fff 3px 6px, #000 6px 7px, #fff 7px 11px, #000 11px 15px, #fff 15px 17px);
+}
+
+@utility qr-pattern {
+  background: repeating-conic-gradient(#000 0 25%, #fff 0 50%) 0 0 / 14px 14px;
+}
+
+/* Les éléments animés à l'apparition restent visibles sans JS */
+.js [data-reveal],
+.js [data-pop] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js [data-reveal],
+  .js [data-pop] {
+    visibility: visible;
+  }
+}
