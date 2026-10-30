@@ -17,12 +17,12 @@ Site vitrine du défi back-end **Kraken : Sold Out** (Kraken by HustlerLabs), en
 
 ```bash
 cp .env.example .env   # puis remplir les valeurs
-npm install
-npm run db:migrate     # prisma migrate deploy
-npm run db:seed        # premier admin (FIRST_ADMIN_EMAIL)
-npm run dev     # http://localhost:3000
-npm run build && npm start
-npm run lint
+pnpm install
+pnpm db:migrate        # prisma migrate deploy
+pnpm db:seed           # premier admin (FIRST_ADMIN_EMAIL)
+pnpm dev        # http://localhost:3000
+pnpm build && pnpm start
+pnpm lint
 ```
 
 ## Pages
@@ -121,12 +121,12 @@ En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérif
 
 1. Créer la base Neon : `DATABASE_URL` (poolée) et `DIRECT_URL` (directe).
 2. Renseigner toutes les variables de `.env.example` dans Vercel.
-3. `npm run db:migrate` puis `npm run db:seed` (une fois).
+3. `vercel env pull .env` puis `pnpm db:migrate` et `pnpm db:seed` (une fois).
 4. **Brevo** : valider l'expéditeur `kraken@hustlerlabs.tech` et authentifier le domaine (SPF, DKIM, DMARC), puis créer une clé API.
 5. **FeexPay** : webhook `https://kraken.hustlerlabs.tech/api/webhooks/feexpay`, en-tête `Authorization` de type Bearer = `FEEXPAY_WEBHOOK_SECRET`. `FEEXPAY_MODE=mock` simule les paiements en local (refus si le numéro finit par 00).
 6. **Cron** : `vercel.json` appelle `/api/cron/reconcile` toutes les 5 minutes (Vercel envoie `Authorization: Bearer $CRON_SECRET`) pour rattraper les paiements sans webhook.
-7. **Push** : `npx web-push generate-vapid-keys`.
+7. **Push** : `pnpm dlx web-push generate-vapid-keys`.
 
-La migration initiale (`prisma/migrations`) a été écrite à la main : la vérifier une fois avec `npx prisma migrate dev` sur une base vide. En local, `EMAIL_LOG_TO_CONSOLE=true` affiche les e-mails dans la console au lieu de les envoyer.
+La migration initiale (`prisma/migrations`) a été écrite à la main : la vérifier une fois avec `pnpm prisma migrate dev` sur une base vide. En local, `EMAIL_LOG_TO_CONSOLE=true` affiche les e-mails dans la console au lieu de les envoyer.
 
 Les clés de test sont pour l'instant générées localement ; à brancher sur `POST /_admin/keys` de KrakenPay dès que l'endpoint est disponible (`src/lib/server/participants.ts`).

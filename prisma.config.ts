@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -9,7 +9,7 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // Neon : utiliser l'URL directe (non poolée) pour les migrations.
-    url: env("DIRECT_URL"),
+    // Neon : URL directe (non poolée) pour les migrations. DATABASE_URL_UNPOOLED = nom posé par l'intégration Neon de Vercel.
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL ?? "",
   },
 });
