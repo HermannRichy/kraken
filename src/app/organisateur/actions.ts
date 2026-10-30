@@ -1,0 +1,34 @@
+"use server";
+
+import { hashIp } from "@/lib/server/crypto";
+import { db } from "@/lib/server/db";
+import { sendEmail } from "@/lib/server/email/send";
+import { templates } from "@/lib/server/email/templates";
+import { env } from "@/lib/server/env";
+import { rateLimitAll, retryMessage } from "@/lib/server/rate-limit";
+import { getClientIp } from "@/lib/server/request";
+import { contactSchema, fieldErrors, type ContactInput } from "@/lib/validation";
+
+export type ContactResult = { ok: true } | { ok: false; message: string; errors?: Record<string, string> };
+
+/** Formulaire de contact : enregistrement en base, e-mail à l'équipe et accusé de réception. */
+export async function contactAction(input: ContactInput): Promise<ContactResult> {
+  const ipHash = hashIp(await getClientIp()) ?? "unknown";
+  const limit = await rateLimitAll([
+    [`contact:ip:${ipHash}`, 5, 60 * 60],
+    [`contact:burst:${ipHash}`, 1, 30],
+  ]);
+  if (!limit.ok) return { ok: false, message: retryMessage(limit.retryAfter) };
+
+  const parsed = contactSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, message: "Certains champs sont à corriger.", errors: fieldErrors(parsed.error) };
+  const { name, email, message, website, startedAt } = parsed.data;
+  if (website || Date.now() - startedAt < 3000) return { ok: false, message: "Envoi refusé. Réessayez." };
+
+  await db.contactMessage.create({ data: { name, email, message, ipHash } });
+  await Promise.all([
+    sendEmail({ to: { email: env().EMAIL_FROM_ADDRESS, name: "Équipe Kraken" }, type: "contact_notify", replyTo: email, content: templates.contactNotify({ name, email, message }) }),
+    sendEmail({ to: { email, name }, type: "contact_ack", content: templates.contactAck({ name }) }),
+  ]);
+  return { ok: true };
+}

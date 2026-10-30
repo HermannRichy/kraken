@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Suspense } from "react";
 
 import { BackToTop } from "@/components/layout/back-to-top";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { AppToaster } from "@/components/layout/toaster";
 import { CHALLENGE, STEPS } from "@/config/challenge";
 import { SITE, SITE_URL } from "@/config/site";
 
@@ -81,7 +83,7 @@ const jsonLd = {
     price: 2000,
     priceCurrency: "XOF",
     availability: "https://schema.org/InStock",
-    url: `${SITE_URL}/#inscription`,
+    url: `${SITE_URL}/inscription`,
   },
 };
 
@@ -93,10 +95,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       </head>
       <body className="flex min-h-dvh flex-col">
-        <Header />
+        <Suspense fallback={<div className="h-[110px] border-b-[3px] border-ink bg-white lg:h-[128px]" aria-hidden="true" />}>
+          <Header />
+        </Suspense>
         <main className="flex-1 overflow-hidden">{children}</main>
         <Footer />
         <BackToTop />
+        <AppToaster />
       </body>
     </html>
   );

@@ -104,7 +104,10 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Button href="/#inscription" size="sm" icon="arrow-right" className="sm:min-h-12 sm:px-5 sm:text-base">
+            <Link href="/espace" className="hidden min-h-11 items-center px-2 text-[15px] font-extrabold underline decoration-kraken decoration-[3px] underline-offset-4 sm:inline-flex">
+              Mon espace
+            </Link>
+            <Button href="/inscription" size="sm" icon="arrow-right" className="sm:min-h-12 sm:px-5 sm:text-base">
               S&apos;inscrire
             </Button>
             <button
@@ -126,6 +129,9 @@ export function Header() {
 
       {open && (
         <div ref={panel} className="absolute inset-x-4 top-full mt-3 rounded-[26px] border-[3px] border-ink bg-white p-3 shadow-[8px_8px_0_#000] lg:hidden">
+          <Link href="/espace" onClick={() => setOpen(false)} className="mb-2 flex min-h-14 items-center justify-between rounded-2xl bg-kraken px-4 text-lg font-extrabold text-white">
+            Mon espace <span aria-hidden="true">→</span>
+          </Link>
           {NAV.map((item, i) => (
             <Link
               key={item.href}

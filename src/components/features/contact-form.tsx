@@ -1,55 +1,74 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
-import { AnimatedIcon } from "@/components/motion/animated-icon";
-import { HoverContext, useHoverLift } from "@/components/motion/hover";
+import { contactAction } from "@/app/organisateur/actions";
+import { SubmitButton, TextareaField, TextField } from "@/components/form/fields";
 import { Pop } from "@/components/motion/pop";
 import { Burst } from "@/components/ui/doodles";
+import { contactSchema, fieldErrors } from "@/lib/validation";
 
-const FIELD =
-  "min-h-[52px] w-full rounded-[14px] border-[3px] border-ink bg-white px-4 text-base font-semibold outline-none transition-shadow focus:shadow-[4px_4px_0_#0047FF]";
-
-/** Formulaire de contact. L'envoi n'est pas encore branché. */
+/** Formulaire de contact : validé dans le navigateur et sur le serveur, enregistré et transmis par e-mail. */
 export function ContactForm() {
-  const btn = useRef<HTMLButtonElement>(null);
-  const { hovered, handlers } = useHoverLift(btn, { x: -3, y: -3, scale: 1, boxShadow: ["5px 5px 0 #000", "9px 9px 0 #000"] });
+  const [values, setValues] = useState({ name: "", email: "", message: "", website: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [sent, setSent] = useState(false);
+  const startedAt = useRef(0);
+  const [pending, startTransition] = useTransition();
+
+  const set = (k: keyof typeof values, v: string) => {
+    if (!startedAt.current) startedAt.current = Date.now();
+    setValues((s) => ({ ...s, [k]: v }));
+    if (errors[k]) setErrors((e) => ({ ...e, [k]: "" }));
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const input = { ...values, startedAt: startedAt.current || Date.now() };
+    const parsed = contactSchema.safeParse(input);
+    if (!parsed.success) return setErrors(fieldErrors(parsed.error));
+    startTransition(async () => {
+      const res = await contactAction(input);
+      if (res.ok) {
+        setSent(true);
+        toast.success("Message envoyé", { description: "Un accusé de réception vient de partir dans votre boîte mail." });
+      } else {
+        setErrors(res.errors ?? {});
+        toast.error(res.message);
+      }
+    });
+  };
 
   return (
     <Pop lift={-6} scale={1.01}>
-      <form
-        onSubmit={(e) => {
-          // TODO : brancher l'envoi (route handler + service d'e-mail).
-          e.preventDefault();
-        }}
-        className="flex flex-col gap-[18px] rounded-[32px] border-4 border-ink bg-paper p-6 shadow-[12px_12px_0_#000] [transform:perspective(1200px)_rotateY(-7deg)_rotateX(3deg)_rotateZ(1.2deg)] sm:p-[34px]"
-      >
-        <h2 className="text-3xl font-extrabold tracking-[-0.02em]">Écrire à l&apos;organisation</h2>
-        <label className="flex flex-col gap-2 text-[15px] font-extrabold">
-          Nom complet
-          <input required name="nom" type="text" autoComplete="name" className={FIELD} />
-        </label>
-        <label className="flex flex-col gap-2 text-[15px] font-extrabold">
-          E-mail
-          <input required name="email" type="email" autoComplete="email" className={FIELD} />
-        </label>
-        <label className="flex flex-col gap-2 text-[15px] font-extrabold">
-          Message
-          <textarea required name="message" rows={5} className={`${FIELD} resize-y py-3.5`} />
-        </label>
-        <HoverContext.Provider value={hovered}>
-          <button
-            ref={btn}
-            type="submit"
-            {...handlers}
-            style={{ boxShadow: "5px 5px 0 #000" }}
-            className="inline-flex min-h-14 items-center gap-2.5 self-start rounded-[18px] border-[3px] border-ink bg-kraken px-6 text-[17px] font-extrabold text-white"
-          >
-            Envoyer
-            <AnimatedIcon name="send" size={20} />
-          </button>
-        </HoverContext.Provider>
-      </form>
+      <div className="rounded-[32px] border-4 border-ink bg-paper p-6 shadow-[12px_12px_0_#000] [transform:perspective(1200px)_rotateY(-7deg)_rotateX(3deg)_rotateZ(1.2deg)] sm:p-[34px]">
+        {sent ? (
+          <div role="status" className="flex flex-col gap-4">
+            <h2 className="text-3xl font-extrabold tracking-[-0.02em]">Message envoyé.</h2>
+            <p className="font-semibold">Merci ! L&apos;équipe HustlerLabs revient vers vous rapidement.</p>
+            <button type="button" onClick={() => { setSent(false); setValues({ name: "", email: "", message: "", website: "" }); }} className="self-start font-extrabold underline decoration-kraken decoration-[3px] underline-offset-4">
+              Écrire un autre message
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit} noValidate className="flex flex-col gap-[18px]">
+            <h2 className="text-3xl font-extrabold tracking-[-0.02em]">Écrire à l&apos;organisation</h2>
+            <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+              <label>
+                Site web
+                <input tabIndex={-1} autoComplete="off" value={values.website} onChange={(e) => set("website", e.target.value)} />
+              </label>
+            </div>
+            <TextField label="Nom complet" autoComplete="name" value={values.name} onChange={(e) => set("name", e.target.value)} error={errors.name} maxLength={80} required />
+            <TextField label="E-mail" type="email" inputMode="email" autoComplete="email" value={values.email} onChange={(e) => set("email", e.target.value)} error={errors.email} maxLength={254} required />
+            <TextareaField label="Message" value={values.message} onChange={(e) => set("message", e.target.value)} error={errors.message} maxLength={3000} hint={`${values.message.length}/3000`} required />
+            <SubmitButton pending={pending} pendingLabel="Envoi…" className="self-start">
+              Envoyer
+            </SubmitButton>
+          </form>
+        )}
+      </div>
       <Burst flip size={44} className="-top-6 -right-3.5" />
     </Pop>
   );

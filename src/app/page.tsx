@@ -126,7 +126,7 @@ export default function Home() {
 
             <div data-reveal className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
               <div className="relative">
-                <Button href="#inscription" size="lg" iconLeft="ticket" full className="text-base whitespace-nowrap sm:w-auto sm:text-lg">
+                <Button href="/inscription" size="lg" iconLeft="ticket" full className="text-base whitespace-nowrap sm:w-auto sm:text-lg">
                   Prendre ma place · {CHALLENGE.fee}
                 </Button>
                 <Star size={30} className="-top-4 -right-4" />
@@ -425,7 +425,7 @@ export default function Home() {
               </p>
               <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap">
                 <CurlyArrow color="#fff" className="-top-9 -left-14 hidden lg:block" />
-                <Button href="#formulaire" variant="white" size="lg" icon="arrow-right">
+                <Button href="/inscription" variant="white" size="lg" icon="arrow-right">
                   S&apos;inscrire maintenant
                 </Button>
                 <Button href={CHALLENGE.whatsappUrl} variant="black-on-blue" size="lg" icon="send">
