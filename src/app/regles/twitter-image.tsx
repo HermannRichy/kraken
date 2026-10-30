@@ -1,0 +1,9 @@
+import { OG_CONTENT_TYPE, OG_SIZE, renderOg } from "@/lib/og";
+
+export const alt = "Règles et barème de Kraken : Sold Out";
+export const size = OG_SIZE;
+export const contentType = OG_CONTENT_TYPE;
+
+export default function Image() {
+  return renderOg({ eyebrow: "02 · RÈGLES ET BARÈME", title: "Une vente en trop,", highlight: "et c'est fini.", tone: "black" });
+}

@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { LegalTabs, type LegalSection } from "@/components/features/legal-tabs";
 import { Burst } from "@/components/ui/doodles";
 import { Chip, Container, Highlight } from "@/components/ui/primitives";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Mentions et conditions",
   description: "Conditions de participation, données personnelles et mentions légales.",
-};
+  path: "/mentions",
+});
 
 const SECTIONS: LegalSection[] = [
   {
@@ -44,7 +47,7 @@ const SECTIONS: LegalSection[] = [
 
 export default function MentionsPage() {
   return (
-    <>
+    <PageMotion>
       <section className="border-b-[3px] border-ink bg-paper">
         <Container className="flex flex-col gap-6 pt-14 pb-14 lg:pt-20 lg:pb-[72px]">
           <Chip doodle="squiggle">Mentions et conditions</Chip>
@@ -62,6 +65,6 @@ export default function MentionsPage() {
           <LegalTabs sections={SECTIONS} />
         </Container>
       </section>
-    </>
+    </PageMotion>
   );
 }

@@ -13,6 +13,7 @@ Site vitrine du défi back-end **Kraken : Sold Out** (Kraken by HustlerLabs), en
 ## Démarrer
 
 ```bash
+cp .env.example .env.local   # puis renseigner NEXT_PUBLIC_SITE_URL
 npm install
 npm run dev     # http://localhost:3000
 npm run build && npm start
@@ -49,24 +50,32 @@ src/
     icons/                icônes lucide-animated
 ```
 
+## SEO et partage
+
+- Favicon (`src/app/favicon.ico`, `icon.svg`), icône Apple et icônes du manifeste (`public/icons`)
+- Métadonnées complètes par page via `pageMetadata()` (`src/config/site.ts`) : titre, description, canonical, Open Graph, Twitter
+- Images de partage générées au build pour chaque page (`opengraph-image.tsx` / `twitter-image.tsx`, rendu commun dans `src/lib/og.tsx`)
+- `manifest.webmanifest`, `sitemap.xml`, `robots.txt` et données structurées schema.org `Event`
+- `NEXT_PUBLIC_SITE_URL` doit pointer vers le domaine final pour que les URL absolues soient correctes
+
 ## Animations
 
-Tout est piloté par `src/components/motion/page-motion.tsx` via des attributs `data-*` :
+Tout est piloté par `src/components/motion/page-motion.tsx`, placé **dans chaque page** (il ne s'exécute qu'une fois la page hydratée), via des attributs `data-*` :
 
 | Attribut | Effet |
 | --- | --- |
-| `data-reveal` | Fondu et montée à l'apparition au scroll |
-| `data-pop` | Card qui « pop » (échelle, rotation, rebond) au scroll |
+| `data-reveal` | Fondu et montée à l'entrée à l'écran, rejoué en remontant |
+| `data-pop` | Card qui « pop » (échelle, rotation, rebond) à l'entrée à l'écran, rejoué en remontant |
 | `data-split` | Titre découpé en lettres qui tombent (SplitText) |
 | `data-slam` | Mot surligné qui s'écrase |
 | `data-stamp` | Sticker tamponné au scroll |
 | `data-fill` | Barre qui se remplit au scroll |
 | `data-float` | Dessins SVG animés en boucle (`burst`, `star`, `squiggle`, `arrow`) |
-| `data-marquee` | Bandeau défilant infini (`reverse` pour l'autre sens) |
 
 Composants dédiés :
 
-- **`Pop`** : enveloppe des cards. Soulèvement au survol et déclenchement des icônes animées qu'elle contient. La distorsion CSS reste sur l'enfant, GSAP n'anime que l'enveloppe.
+- **`Pop`** : enveloppe des cards à deux couches (apparition / survol) pour que les deux animations ne se gênent pas. Déclenche aussi les icônes animées qu'elle contient. La distorsion CSS reste sur l'enfant.
+- **`Marquee`** : bandeau défilant infini.
 - **`Button`** : se soulève au survol, s'écrase au clic, son icône s'anime.
 - **Calendrier** : la card qui traverse le centre de l'écran se surélève, puis se repose.
 - **FAQ** : la question au centre de l'écran s'ouvre automatiquement, les autres se referment ; le clic reste possible.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { FaqExplorer } from "@/components/features/faq-explorer";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
@@ -7,15 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Burst } from "@/components/ui/doodles";
 import { Chip, Container, Highlight, IconDot } from "@/components/ui/primitives";
 import { CHALLENGE } from "@/config/challenge";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "FAQ",
   description: "Frais, paiement, participation, langages, ressources, évaluation : toutes les réponses avant de vous inscrire.",
-};
+  path: "/faq",
+});
 
 export default function FaqPage() {
   return (
-    <>
+    <PageMotion>
       <section className="border-b-[3px] border-ink bg-paper">
         <Container className="flex flex-col gap-6 pt-14 pb-14 lg:pt-20 lg:pb-16">
           <Chip doodle="star-blue">05 · FAQ</Chip>
@@ -52,6 +55,6 @@ export default function FaqPage() {
           </aside>
         </Container>
       </section>
-    </>
+    </PageMotion>
   );
 }

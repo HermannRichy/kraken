@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Burst, Squiggle, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Classement",
   description: "Le classement public de Kraken : Sold Out, publié après l'évaluation.",
-};
+  path: "/classement",
+});
 
 const ROWS = [4, 5, 6, 7, 8, 9, 10];
 
 export default function ClassementPage() {
   return (
-    <>
+    <PageMotion>
       <section className="border-b-[3px] border-ink bg-ink text-white">
         <Container className="flex flex-col gap-14 pt-14 pb-20 lg:pt-20 lg:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-8">
@@ -135,6 +138,6 @@ export default function ClassementPage() {
           </Sticker>
         </Pop>
       </section>
-    </>
+    </PageMotion>
   );
 }

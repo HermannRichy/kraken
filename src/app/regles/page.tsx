@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { PageHero } from "@/components/features/page-hero";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Burst, Squiggle, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Règles et barème",
   description: "Six portes éliminatoires, un barème sur 100, le fair-play et les contestations.",
-};
+  path: "/regles",
+});
 
 const SKINS = [
   { card: "bg-kraken text-white shadow-[8px_8px_0_#000]", dot: "black" },
@@ -55,7 +58,7 @@ const FAIR = [
 
 export default function ReglesPage() {
   return (
-    <>
+    <PageMotion>
       <PageHero
         tone="black"
         chip={
@@ -233,6 +236,6 @@ export default function ReglesPage() {
           </div>
         </Container>
       </section>
-    </>
+    </PageMotion>
   );
 }

@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { CtaBand } from "@/components/features/cta-band";
 import { PageHero } from "@/components/features/page-hero";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Burst, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Prix et certificats",
   description: "Un certificat vérifiable pour chaque participant qui livre, des prix pour les trois premiers.",
-};
+  path: "/prix",
+});
 
 export default function PrixPage() {
   return (
-    <>
+    <PageMotion>
       <PageHero
         chip={<Chip doodle="burst">04 · Prix et certificats</Chip>}
         title={
@@ -90,7 +93,7 @@ export default function PrixPage() {
             <Pop lift={-10}>
               <div className="relative flex flex-col gap-[18px] rounded-[30px] border-4 border-ink bg-white p-6 shadow-[12px_12px_0_#000] [transform:perspective(1200px)_rotateY(-10deg)_rotateX(5deg)_rotateZ(2.5deg)] sm:p-[34px]">
                 <div className="flex items-center justify-between gap-4">
-                  <Image src="/brand/kraken-horizontal-noir.svg" alt="Kraken by HustlerLabs" width={130} height={40} className="h-8 w-auto sm:h-10" />
+                  <Image src="/brand/kraken-horizontal-noir.svg" alt="Kraken by HustlerLabs" width={130} height={40} className="h-8 w-[104px] sm:h-10 sm:w-[130px]" />
                   <span className="text-right text-[10px] font-extrabold tracking-[0.1em] text-steel sm:text-xs">CERTIFICAT DE PARTICIPATION</span>
                 </div>
                 <div className="text-sm font-bold text-steel">Décerné à</div>
@@ -123,6 +126,6 @@ export default function PrixPage() {
         href="/regles"
         label="Comment on note"
       />
-    </>
+    </PageMotion>
   );
 }

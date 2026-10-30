@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { ContactForm } from "@/components/features/contact-form";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { CHALLENGE } from "@/config/challenge";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Organisateur",
   description: "Kraken est une série de défis back-end portée par HustlerLabs.",
-};
+  path: "/organisateur",
+});
 
 export default function OrganisateurPage() {
   return (
-    <>
+    <PageMotion>
       <section className="relative overflow-hidden border-b-[3px] border-ink bg-kraken text-white">
         <Image
           src="/brand/kraken-symbole-blanc.svg"
@@ -87,6 +90,6 @@ export default function OrganisateurPage() {
           </div>
         </Container>
       </section>
-    </>
+    </PageMotion>
   );
 }

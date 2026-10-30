@@ -42,7 +42,7 @@ export function Header() {
           className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10 lg:py-[18px]"
         >
           <Link href="/" aria-label="Kraken by HustlerLabs, accueil" className="flex">
-            <Image src="/brand/kraken-horizontal-noir.svg" alt="Kraken by HustlerLabs" width={169} height={52} priority className="h-10 w-auto lg:h-[52px]" />
+            <Image src="/brand/kraken-horizontal-noir.svg" alt="Kraken by HustlerLabs" width={169} height={52} priority className="h-10 w-[130px] lg:h-[52px] lg:w-[169px]" />
           </Link>
 
           <div className="hidden items-center gap-1.5 lg:flex">

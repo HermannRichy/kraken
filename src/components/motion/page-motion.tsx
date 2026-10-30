@@ -1,25 +1,24 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useRef, type ReactNode } from "react";
 
 import { gsap, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
 
 /**
- * Chef d'orchestre des animations de page, piloté par attributs data-* :
- * - data-reveal   : fondu + montée au scroll
- * - data-pop      : card qui « pop » (échelle, rotation, rebond) au scroll
- * - data-split    : titre découpé en lettres qui tombent
- * - data-slam     : bloc surligné qui s'écrase
- * - data-stamp    : sticker tamponné au scroll
- * - data-fill     : barre qui se remplit au scroll
- * - data-float    : dessins SVG animés en boucle (burst, star, squiggle, arrow)
- * - data-marquee  : bandeau défilant infini ("reverse" pour l'autre sens)
- * - data-tilt     : élément qui se redresse au scroll (scrub)
+ * Chef d'orchestre des animations d'une page, piloté par attributs data-* :
+ * - data-reveal : fondu + montée quand l'élément entre à l'écran (rejoué en remontant)
+ * - data-pop    : card qui « pop » (échelle, rotation, rebond) à l'entrée à l'écran
+ * - data-split  : titre découpé en lettres qui tombent
+ * - data-slam   : bloc surligné qui s'écrase
+ * - data-stamp  : sticker tamponné à l'entrée à l'écran
+ * - data-fill   : barre qui se remplit à l'entrée à l'écran
+ * - data-float  : dessins SVG animés en boucle (burst, star, squiggle, arrow)
+ *
+ * À placer DANS chaque page (autour de son contenu) : ses effets ne tournent
+ * qu'une fois toute la page hydratée, sinon React écraserait les états initiaux.
  */
 export function PageMotion({ children }: { children: ReactNode }) {
   const scope = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
 
   useGSAP(
     () => {
@@ -29,14 +28,19 @@ export function PageMotion({ children }: { children: ReactNode }) {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         // Titres découpés
         q("[data-split]").forEach((el: HTMLElement) => {
-          const split = SplitText.create(el, { type: "words,chars", wordsClass: "inline-block" });
-          gsap.from(split.chars, {
-            yPercent: -130,
-            rotation: () => gsap.utils.random(-25, 25),
-            autoAlpha: 0,
-            duration: 0.75,
-            ease: "back.out(2)",
-            stagger: 0.025,
+          SplitText.create(el, {
+            type: "words,chars",
+            wordsClass: "inline-block",
+            autoSplit: true,
+            onSplit: (self) =>
+              gsap.from(self.chars, {
+                yPercent: -130,
+                rotation: () => gsap.utils.random(-25, 25),
+                autoAlpha: 0,
+                duration: 0.75,
+                ease: "back.out(2)",
+                stagger: 0.025,
+              }),
           });
         });
 
@@ -49,51 +53,39 @@ export function PageMotion({ children }: { children: ReactNode }) {
             duration: 0.7,
             ease: "back.out(2.2)",
             delay: 0.45 + i * 0.1,
-            scrollTrigger: { trigger: el, start: "top 92%", once: true },
+            scrollTrigger: { trigger: el, start: "top 92%", toggleActions: "play none none none" },
           });
         });
 
-        // Reveal
-        gsap.set(q("[data-reveal]"), { autoAlpha: 0, y: 40 });
-        ScrollTrigger.batch(q("[data-reveal]"), {
-          start: "top 90%",
-          once: true,
-          onEnter: (els) =>
-            gsap.to(els, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.08, overwrite: true }),
+        // Reveal (rejoué en remontant)
+        const reveals = q("[data-reveal]");
+        gsap.set(reveals, { autoAlpha: 0, y: 48 });
+        ScrollTrigger.batch(reveals, {
+          start: "top 88%",
+          onEnter: (els) => gsap.to(els, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.08, overwrite: true }),
+          onLeaveBack: (els) => gsap.to(els, { autoAlpha: 0, y: 48, duration: 0.3, ease: "power1.in", overwrite: true }),
         });
 
-        // Pop des cards
-        gsap.set(q("[data-pop]"), {
-          autoAlpha: 0,
-          scale: 0.6,
-          y: 80,
-          rotation: () => gsap.utils.random(-10, 10),
-        });
-        ScrollTrigger.batch(q("[data-pop]"), {
-          start: "top 92%",
-          once: true,
+        // Pop des cards (rejoué en remontant)
+        const pops = q("[data-pop]");
+        gsap.set(pops, { autoAlpha: 0, scale: 0.55, y: 90, rotation: () => gsap.utils.random(-12, 12) });
+        ScrollTrigger.batch(pops, {
+          start: "top 90%",
           onEnter: (els) =>
-            gsap.to(els, {
-              autoAlpha: 1,
-              scale: 1,
-              y: 0,
-              rotation: 0,
-              duration: 0.9,
-              ease: "back.out(1.6)",
-              stagger: 0.1,
-              overwrite: "auto",
-            }),
+            gsap.to(els, { autoAlpha: 1, scale: 1, y: 0, rotation: 0, duration: 0.9, ease: "back.out(1.7)", stagger: 0.12, overwrite: true }),
+          onLeaveBack: (els) =>
+            gsap.to(els, { autoAlpha: 0, scale: 0.55, y: 90, rotation: () => gsap.utils.random(-12, 12), duration: 0.35, ease: "power2.in", overwrite: true }),
         });
 
         // Stickers tamponnés
         q("[data-stamp]").forEach((el: HTMLElement) => {
           gsap.from(el, {
-            scale: 2.4,
+            scale: 2.6,
             autoAlpha: 0,
             duration: 0.55,
             ease: "back.out(2.5)",
-            delay: 0.35,
-            scrollTrigger: { trigger: el, start: "top 90%", once: true },
+            delay: 0.4,
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
           });
         });
 
@@ -104,21 +96,8 @@ export function PageMotion({ children }: { children: ReactNode }) {
             transformOrigin: "left center",
             duration: 1.1,
             ease: "power4.out",
-            scrollTrigger: { trigger: el, start: "top 92%", once: true },
+            scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none reverse" },
           });
-        });
-
-        // Redressement au scroll
-        q("[data-tilt]").forEach((el: HTMLElement) => {
-          gsap.fromTo(
-            el,
-            { rotation: Number(el.dataset.tilt || -4) },
-            {
-              rotation: 0,
-              ease: "none",
-              scrollTrigger: { trigger: el, start: "top bottom", end: "center center", scrub: 1 },
-            },
-          );
         });
 
         // Dessins en boucle
@@ -126,10 +105,10 @@ export function PageMotion({ children }: { children: ReactNode }) {
           const kind = el.getAttribute("data-float");
           const delay = gsap.utils.random(0, 1.2);
           if (kind === "burst") {
-            gsap.to(el, { scale: 1.18, rotation: 10, duration: 0.6, ease: "sine.inOut", repeat: -1, yoyo: true, delay });
+            gsap.to(el, { scale: 1.2, rotation: 10, duration: 0.6, ease: "sine.inOut", repeat: -1, yoyo: true, delay });
           } else if (kind === "star") {
             gsap.to(el, { rotation: 360, duration: 6, ease: "none", repeat: -1 });
-            gsap.to(el, { scale: 0.75, duration: 0.9, ease: "sine.inOut", repeat: -1, yoyo: true, delay });
+            gsap.to(el, { scale: 0.72, duration: 0.9, ease: "sine.inOut", repeat: -1, yoyo: true, delay });
           } else if (kind === "squiggle") {
             const path = el.querySelector("path");
             if (path) {
@@ -144,33 +123,26 @@ export function PageMotion({ children }: { children: ReactNode }) {
             gsap.to(el, { x: 6, y: 6, duration: 0.7, ease: "sine.inOut", repeat: -1, yoyo: true, delay });
           }
         });
-
-        // Bandeaux défilants
-        q("[data-marquee]").forEach((el: HTMLElement) => {
-          const track = el.firstElementChild as HTMLElement | null;
-          if (!track) return;
-          const reverse = el.dataset.marquee === "reverse";
-          gsap.fromTo(
-            track,
-            { xPercent: reverse ? -50 : 0 },
-            { xPercent: reverse ? 0 : -50, duration: Number(el.dataset.speed || 28), ease: "none", repeat: -1 },
-          );
-        });
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
         gsap.set(q("[data-reveal], [data-pop]"), { autoAlpha: 1 });
       });
 
-      ScrollTrigger.refresh();
-      return () => mm.revert();
+      // Recalcule les positions quand polices et images ont fini de charger.
+      const refresh = () => ScrollTrigger.refresh();
+      document.fonts?.ready.then(refresh);
+      window.addEventListener("load", refresh);
+      const t = window.setTimeout(refresh, 400);
+
+      return () => {
+        window.removeEventListener("load", refresh);
+        window.clearTimeout(t);
+        mm.revert();
+      };
     },
-    { scope, dependencies: [pathname], revertOnUpdate: true },
+    { scope },
   );
 
-  return (
-    <div ref={scope} className="flex min-h-dvh flex-col">
-      {children}
-    </div>
-  );
+  return <div ref={scope}>{children}</div>;
 }

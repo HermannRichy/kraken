@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { PageHero } from "@/components/features/page-hero";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Burst, Squiggle } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Documentation",
   description: "Dossier du participant, contrats OpenAPI, cahier des charges de KrakenPay et fichiers obligatoires.",
-};
+  path: "/documentation",
+});
 
 const SKINS = [
   { card: "bg-white text-ink shadow-[8px_8px_0_#000]", dot: "black", border: "border-ink text-ink" },
@@ -32,7 +35,7 @@ const FILES = ["README.md", "docker-compose.yml", ".env.example", "openapi.yaml"
 
 export default function DocumentationPage() {
   return (
-    <>
+    <PageMotion>
       <PageHero
         chip={<Chip doodle="star-blue">Documentation</Chip>}
         title={
@@ -127,6 +130,6 @@ export default function DocumentationPage() {
           </div>
         </Container>
       </section>
-    </>
+    </PageMotion>
   );
 }

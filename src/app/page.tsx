@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { CalendarGrid } from "@/components/features/calendar";
 import { Countdown } from "@/components/features/countdown";
 import { FaqList } from "@/components/features/faq-list";
@@ -84,7 +85,7 @@ export default function Home() {
   const fill = seats === null ? 62 : Math.round(((CHALLENGE.seats - seats) / CHALLENGE.seats) * 100);
 
   return (
-    <>
+    <PageMotion>
       {/* HERO */}
       <section id="accueil" className="relative border-b-[3px] border-ink bg-paper">
         <Container className="flex flex-wrap items-center gap-14 pt-10 pb-16 lg:pt-[72px] lg:pb-24">
@@ -146,7 +147,7 @@ export default function Home() {
               <Pop lift={-12}>
                 <div className="distort-hero overflow-hidden rounded-[28px] border-4 border-ink bg-white shadow-[12px_12px_0_#000] lg:rounded-[32px]">
                   <div className="flex items-center justify-between bg-ink px-5 py-4 text-white lg:px-6">
-                    <Image src="/brand/kraken-horizontal-blanc.svg" alt="Kraken" width={110} height={34} className="h-7 w-auto lg:h-[34px]" />
+                    <Image src="/brand/kraken-horizontal-blanc.svg" alt="Kraken" width={110} height={34} className="h-7 w-[91px] lg:h-[34px] lg:w-[110px]" />
                     <span className="text-[11px] font-extrabold tracking-[0.1em] lg:text-[13px]">ÉDITION 01</span>
                   </div>
                   <div className="flex flex-col gap-4 p-5 lg:px-6 lg:pt-6 lg:pb-5">
@@ -432,7 +433,7 @@ export default function Home() {
           </div>
         </Pop>
       </section>
-    </>
+    </PageMotion>
   );
 }
 

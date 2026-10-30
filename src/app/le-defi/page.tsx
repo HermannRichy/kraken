@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { CtaBand } from "@/components/features/cta-band";
 import { PageHero } from "@/components/features/page-hero";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
@@ -7,11 +8,13 @@ import { Pop } from "@/components/motion/pop";
 import { Burst, Squiggle, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Le défi",
   description: "Construisez le back-end d'une billetterie qui ne vend jamais deux fois le dernier billet.",
-};
+  path: "/le-defi",
+});
 
 const DELIVERABLES = [
   { icon: "terminal", text: "Une API HTTP conforme au contrat", tone: "black" },
@@ -74,7 +77,7 @@ function WavyArrow() {
 
 export default function DefiPage() {
   return (
-    <>
+    <PageMotion>
       <PageHero
         chip={<Chip doodle="burst">01 · Le défi</Chip>}
         title={
@@ -234,6 +237,6 @@ export default function DefiPage() {
       </section>
 
       <CtaBand title="Prêt ? Lisez les règles avant de payer quoi que ce soit." href="/regles" label="Règles et barème" />
-    </>
+    </PageMotion>
   );
 }

@@ -17,18 +17,22 @@ type Props = {
 };
 
 /**
- * Enveloppe d'une card distordue : pop à l'apparition, soulèvement au survol,
- * et déclenchement des icônes animées qu'elle contient.
- * La distorsion CSS reste sur l'enfant : GSAP n'anime que cette enveloppe.
+ * Enveloppe d'une card distordue.
+ * - couche externe : pop à l'apparition au scroll (PageMotion)
+ * - couche interne : soulèvement au survol + déclenchement des icônes animées
+ * La distorsion CSS reste sur l'enfant : GSAP n'anime que ces deux couches,
+ * qui ne se gênent jamais.
  */
 export function Pop({ children, className, pop = true, lift = -10, scale = 1.03, rotation = 0 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { hovered, handlers } = useHoverLift(ref, { y: lift, scale, rotation });
+  const inner = useRef<HTMLDivElement>(null);
+  const { hovered, handlers } = useHoverLift(inner, { y: lift, scale, rotation });
 
   return (
     <HoverContext.Provider value={hovered}>
-      <div ref={ref} data-pop={pop ? "" : undefined} className={cn("group relative", className)} {...handlers}>
-        {children}
+      <div data-pop={pop ? "" : undefined} className={cn("group relative", className)}>
+        <div ref={inner} className="relative h-full" {...handlers}>
+          {children}
+        </div>
       </div>
     </HoverContext.Provider>
   );

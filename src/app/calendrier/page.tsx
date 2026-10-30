@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageMotion } from "@/components/motion/page-motion";
 import { CalendarTimeline } from "@/components/features/calendar";
 import { Countdown } from "@/components/features/countdown";
 import { PageHero } from "@/components/features/page-hero";
@@ -7,15 +8,17 @@ import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
 import { Burst, Star } from "@/components/ui/doodles";
 import { Chip, Highlight } from "@/components/ui/primitives";
+import { pageMetadata } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Calendrier",
   description: "Inscriptions, ouverture du défi, date limite de livraison, évaluation et résultats.",
-};
+  path: "/calendrier",
+});
 
 export default function CalendrierPage() {
   return (
-    <>
+    <PageMotion>
       <PageHero
         chip={<Chip doodle="squiggle">03 · Calendrier</Chip>}
         title={
@@ -50,6 +53,6 @@ export default function CalendrierPage() {
           </p>
         </div>
       </section>
-    </>
+    </PageMotion>
   );
 }

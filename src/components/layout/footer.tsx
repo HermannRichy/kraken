@@ -35,7 +35,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-[1280px] flex-col gap-9 px-4 pt-14 pb-9 sm:px-6 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-10">
           <div className="flex max-w-[360px] flex-col gap-4">
-            <Image src="/brand/kraken-horizontal-blanc.svg" alt="Kraken by HustlerLabs" width={182} height={56} className="h-12 w-auto self-start lg:h-14" />
+            <Image src="/brand/kraken-horizontal-blanc.svg" alt="Kraken by HustlerLabs" width={182} height={56} className="h-12 w-[156px] self-start lg:h-14 lg:w-[182px]" />
             <p className="text-[15px] leading-relaxed font-semibold text-mist">
               Des challenges de développement exigeants. Organisé par HustlerLabs.
             </p>
