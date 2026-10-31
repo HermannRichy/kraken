@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 
-import { AdminShell, type AdminNavItem } from "@/components/admin/admin-shell";
+import { DashboardShell, type NavItem } from "@/components/dashboard/shell";
 import { adminLoginPath } from "@/lib/admin-path";
 import { ROLE_LABELS, type Role } from "@/lib/permissions";
 import { requireStaff } from "@/lib/server/session";
@@ -10,21 +10,31 @@ export const metadata: Metadata = { title: { default: "Administration", template
 
 async function Shell({ children }: { children: ReactNode }) {
   const { session, role } = await requireStaff(undefined, { allowWithout2fa: true });
-  const items: AdminNavItem[] = [
+  const items: NavItem[] = [
     { href: "/admin", label: "Tableau de bord", icon: "dashboard", group: "main" },
     { href: "/admin/participants", label: "Participants", icon: "participants", group: "main" },
     ...(role === "admin"
       ? ([
           { href: "/admin/equipe", label: "Équipe", icon: "team", group: "main" },
           { href: "/admin/reglages", label: "Réglages", icon: "settings", group: "main" },
-        ] satisfies AdminNavItem[])
+        ] satisfies NavItem[])
       : []),
     { href: "/admin/securite", label: "Sécurité", icon: "security", group: "account" },
   ];
   return (
-    <AdminShell items={items} user={{ name: session.user.name, email: session.user.email, role: ROLE_LABELS[role as Role] }} loginPath={adminLoginPath()}>
+    <DashboardShell
+      badge="ADMIN"
+      home="/admin"
+      items={items}
+      groups={[
+        { id: "main", label: "Pilotage" },
+        { id: "account", label: "Compte" },
+      ]}
+      user={{ name: session.user.name, email: session.user.email, role: ROLE_LABELS[role as Role] }}
+      signOutTo={adminLoginPath()}
+    >
       {children}
-    </AdminShell>
+    </DashboardShell>
   );
 }
 

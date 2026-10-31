@@ -101,6 +101,8 @@ Les informations encore inconnues sont entre crochets dans le code : `[XX]` (pla
 3. `/espace` : paiement Mobile Money FeexPay (2 000 FCFA, clé d'idempotence, attribution des places sous verrou), suivi en direct, puis clés de test chiffrées (AES-256-GCM), révélation et régénération consignées. Invitation aux notifications push à l'arrivée.
 4. Plus de place : liste d'attente automatique.
 
+Espace participant (`/espace`) : interface avec barre latérale (tiroir sur mobile) : Accueil (avancement, prochaine étape, compte à rebours), Paiement (paiement et historique), Mes clés, Documentation, Notifications (activer, tester, désactiver sur l'appareil), Mon profil.
+
 Connexion participant : `/connexion` (lien magique 15 min). Équipe : adresse secrète `/<ADMIN_PATH>` (mot de passe + double authentification obligatoire, configurée sur `/admin/securite`). Avec `ADMIN_PATH` défini, `/admin/connexion` et toute page `/admin` sans session répondent 404 ; l'adresse n'apparaît nulle part sur le site.
 
 ### Administration (`/admin`)

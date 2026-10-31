@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { NoteForm, ParticipantActions } from "@/components/admin/participant-actions";
-import { fmtDate, PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel, StatusBadge } from "@/components/dashboard/ui";
 import { countryName } from "@/config/countries";
 import { NETWORKS } from "@/config/payment";
 import { LEVELS } from "@/lib/validation";

@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, LayoutDashboard, LogOut, Menu, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from "lucide-react";
+import { Bell, BookOpen, CreditCard, ExternalLink, House, KeyRound, LayoutDashboard, Lock, LogOut, Menu, Settings, ShieldCheck, UserCog, UserRound, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
@@ -9,20 +9,42 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
-export type AdminNavItem = { href: string; label: string; icon: "dashboard" | "participants" | "team" | "settings" | "security"; group: "main" | "account" };
-
-const ICONS: Record<AdminNavItem["icon"], LucideIcon> = {
+const ICONS = {
   dashboard: LayoutDashboard,
   participants: Users,
   team: UserCog,
   settings: Settings,
   security: ShieldCheck,
+  home: House,
+  payment: CreditCard,
+  keys: KeyRound,
+  docs: BookOpen,
+  bell: Bell,
+  user: UserRound,
+} satisfies Record<string, LucideIcon>;
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: keyof typeof ICONS;
+  group: string;
+  /** Pastille à droite (ex. « À faire »). */
+  badge?: string;
+  /** Section pas encore disponible pour cet utilisateur (cadenas). */
+  locked?: boolean;
 };
 
 type Props = {
-  items: AdminNavItem[];
+  /** Libellé à côté du logo (ADMIN, ESPACE…). */
+  badge: string;
+  /** Page d'accueil de l'interface (lien du logo, onglet « exact »). */
+  home: string;
+  items: NavItem[];
+  groups: { id: string; label: string }[];
   user: { name: string; email: string; role: string };
-  loginPath: string;
+  /** Destination après déconnexion. */
+  signOutTo: string;
+  links?: { href: string; label: string }[];
   children: ReactNode;
 };
 
@@ -41,10 +63,10 @@ const initials = (name: string) =>
     .map((p) => p[0]?.toUpperCase())
     .join("") || "K";
 
-const isActive = (pathname: string, href: string) => (href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`));
+const isActive = (pathname: string, href: string, home: string) => (href === home ? pathname === home : pathname === href || pathname.startsWith(`${href}/`));
 
-/** Interface d'administration : barre latérale fixe sur grand écran, tiroir sur mobile et tablette. */
-export function AdminShell({ items, user, loginPath, children }: Props) {
+/** Interface type tableau de bord : barre latérale fixe sur grand écran, tiroir sur mobile et tablette. */
+export function DashboardShell({ badge, home, items, groups, user, signOutTo, links = [{ href: "/", label: "Voir le site" }], children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -82,19 +104,14 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
     };
   }, [open, desktop]);
 
-  const current = items.find((it) => isActive(pathname, it.href))?.label ?? "Administration";
+  const current = items.find((it) => isActive(pathname, it.href, home))?.label ?? badge;
   const signOut = () =>
     startSignOut(async () => {
       await authClient.signOut();
       toast.success("Vous êtes déconnecté.");
-      router.push(loginPath);
+      router.push(signOutTo);
       router.refresh();
     });
-
-  const groups = [
-    { id: "main", label: "Pilotage" },
-    { id: "account", label: "Compte" },
-  ] as const;
 
   return (
     <div data-admin-shell className="min-h-dvh bg-paper text-ink">
@@ -112,7 +129,7 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
           <Menu size={22} strokeWidth={2.75} aria-hidden="true" />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] leading-none font-extrabold tracking-[0.12em] text-mist">KRAKEN · ADMIN</div>
+          <div className="text-[11px] leading-none font-extrabold tracking-[0.12em] text-mist">KRAKEN · {badge}</div>
           <div className="truncate text-[17px] leading-tight font-extrabold">{current}</div>
         </div>
         <span className="flex size-10 flex-none items-center justify-center rounded-full border-[3px] border-white bg-kraken text-sm font-extrabold" aria-hidden="true">
@@ -130,7 +147,7 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
       {/* Barre latérale */}
       <aside
         id="admin-sidebar"
-        aria-label="Navigation de l'administration"
+        aria-label={`Navigation ${badge.toLowerCase()}`}
         inert={!desktop && !open}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[288px] max-w-[86vw] flex-col border-r-[3px] border-ink bg-ink text-white transition-transform duration-300 ease-out motion-reduce:transition-none lg:translate-x-0",
@@ -138,9 +155,9 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
         )}
       >
         <div className="flex h-16 flex-none items-center justify-between gap-3 border-b-[3px] border-white/15 px-5 lg:h-20">
-          <Link href="/admin" className="flex items-center gap-2.5">
+          <Link href={home} className="flex items-center gap-2.5">
             <span className="text-2xl font-extrabold tracking-[-0.05em]">KRAKEN</span>
-            <span className="rounded-full bg-kraken px-2.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em]">ADMIN</span>
+            <span className="rounded-full bg-kraken px-2.5 py-0.5 text-[11px] font-extrabold tracking-[0.08em]">{badge}</span>
           </Link>
           <button
             ref={closeRef}
@@ -166,7 +183,7 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
                 <ul className="flex flex-col gap-1.5">
                   {list.map((it) => {
                     const Icon = ICONS[it.icon];
-                    const active = isActive(pathname, it.href);
+                    const active = isActive(pathname, it.href, home);
                     return (
                       <li key={it.href}>
                         <Link
@@ -178,7 +195,11 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
                           )}
                         >
                           <Icon size={20} strokeWidth={2.5} aria-hidden="true" className="flex-none" />
-                          {it.label}
+                          <span className="min-w-0 flex-1 truncate">{it.label}</span>
+                          {it.locked && <Lock size={15} strokeWidth={2.75} aria-label="Pas encore disponible" className={active ? "text-steel" : "text-mist"} />}
+                          {it.badge && (
+                            <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-extrabold whitespace-nowrap", active ? "bg-kraken text-white" : "bg-white text-ink")}>{it.badge}</span>
+                          )}
                         </Link>
                       </li>
                     );
@@ -190,10 +211,12 @@ export function AdminShell({ items, user, loginPath, children }: Props) {
         </nav>
 
         <div className="flex flex-none flex-col gap-3 border-t-[3px] border-white/15 p-4">
-          <Link href="/" className="flex items-center gap-2 px-1 text-sm font-bold text-mist hover:text-white">
-            <ExternalLink size={16} strokeWidth={2.5} aria-hidden="true" />
-            Voir le site
-          </Link>
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} className="flex items-center gap-2 px-1 text-sm font-bold text-mist hover:text-white">
+              <ExternalLink size={16} strokeWidth={2.5} aria-hidden="true" />
+              {l.label}
+            </Link>
+          ))}
           <div className="flex items-center gap-3 rounded-[16px] border-[3px] border-white/20 p-2.5">
             <span className="flex size-10 flex-none items-center justify-center rounded-full border-[3px] border-white bg-kraken text-sm font-extrabold" aria-hidden="true">
               {initials(user.name)}

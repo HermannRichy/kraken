@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { PageHeader, Panel, Stat, STATUS_LABELS } from "@/components/admin/ui";
+import { PageHeader, Panel, Stat, STATUS_LABELS } from "@/components/dashboard/ui";
 import { countryName } from "@/config/countries";
 import { LEVELS } from "@/lib/validation";
 import { db } from "@/lib/server/db";

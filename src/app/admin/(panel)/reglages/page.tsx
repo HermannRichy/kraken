@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { SeatsCapForm } from "@/components/admin/staff-forms";
-import { PageHeader, Panel } from "@/components/admin/ui";
+import { PageHeader, Panel } from "@/components/dashboard/ui";
 import { getSeatsCap } from "@/lib/server/participants";
 import { isMockMode } from "@/lib/server/feexpay";
 import { requireStaff } from "@/lib/server/session";

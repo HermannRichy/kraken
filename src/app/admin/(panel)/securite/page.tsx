@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { TwoFactorSetup } from "@/components/admin/staff-forms";
-import { PageHeader, Panel } from "@/components/admin/ui";
+import { PageHeader, Panel } from "@/components/dashboard/ui";
 import { requireStaff } from "@/lib/server/session";
 
 async function Security() {

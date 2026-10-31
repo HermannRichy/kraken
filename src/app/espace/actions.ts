@@ -8,6 +8,7 @@ import { db } from "@/lib/server/db";
 import { encryptedKeys, readKeys } from "@/lib/server/participants";
 import { startPayment, type StartPaymentResult } from "@/lib/server/payments";
 import { rateLimit, retryMessage } from "@/lib/server/rate-limit";
+import { pushToUser } from "@/lib/server/push";
 import { requireParticipant } from "@/lib/server/session";
 import { fieldErrors, paymentSchema, toE164, type PaymentInput } from "@/lib/validation";
 import { NETWORKS } from "@/config/payment";
@@ -30,7 +31,7 @@ export async function payAction(input: PaymentInput): Promise<PayResult> {
     phoneE164: toE164(parsed.data.phone, net.country),
     idempotencyKey: parsed.data.idempotencyKey,
   });
-  revalidatePath("/espace");
+  revalidatePath("/espace", "layout");
   return res;
 }
 
@@ -57,7 +58,7 @@ export async function regenerateKeysAction(confirmation: string): Promise<{ ok: 
 
   await db.participant.update({ where: { id: participant.id }, data: encryptedKeys() });
   await audit({ actorId: session.user.id, action: "keys.regenerate", targetType: "participant", targetId: participant.id });
-  revalidatePath("/espace");
+  revalidatePath("/espace", "layout");
   return { ok: true };
 }
 
@@ -79,4 +80,22 @@ export async function savePushSubscriptionAction(sub: unknown, userAgent?: strin
     update: { userId: session.user.id, p256dh: parsed.data.keys.p256dh, auth: parsed.data.keys.auth },
   });
   return { ok: true };
+}
+
+/** Désabonne un appareil des notifications push. */
+export async function removePushSubscriptionAction(endpoint: string): Promise<{ ok: boolean }> {
+  const { session } = await requireParticipant();
+  const parsed = z.string().url().max(1000).safeParse(endpoint);
+  if (!parsed.success) return { ok: false };
+  await db.pushSubscription.deleteMany({ where: { userId: session.user.id, endpoint: parsed.data } });
+  return { ok: true };
+}
+
+/** Envoie une notification de test à tous les appareils de l'utilisateur. */
+export async function sendTestPushAction(): Promise<{ ok: boolean; error?: string }> {
+  const { session } = await requireParticipant();
+  const limit = await rateLimit(`push-test:${session.user.id}`, 3, 10 * 60);
+  if (!limit.ok) return { ok: false, error: retryMessage(limit.retryAfter) };
+  const { sent } = await pushToUser(session.user.id, { title: "Kraken : Sold Out", body: "Notifications actives sur cet appareil. On vous préviendra au bon moment.", url: "/espace", tag: "test" });
+  return sent > 0 ? { ok: true } : { ok: false, error: "Aucun appareil abonné ou notifications non configurées." };
 }

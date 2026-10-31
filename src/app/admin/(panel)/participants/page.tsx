@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { fmtDate, PageHeader, Panel, StatusBadge, STATUS_LABELS } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel, StatusBadge, STATUS_LABELS } from "@/components/dashboard/ui";
 import { countryName } from "@/config/countries";
 import type { Prisma } from "@/generated/prisma/client";
 import { LEVELS } from "@/lib/validation";

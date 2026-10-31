@@ -3,17 +3,11 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { savePushSubscriptionAction } from "@/app/espace/actions";
+import { subscribeDevice } from "@/components/espace/push-client";
 import { SubmitButton } from "@/components/form/fields";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 const DISMISS_KEY = "kraken-push-later";
-
-function urlBase64ToUint8Array(base64: string) {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
-}
 
 /**
  * Proposition d'activer les notifications push à l'arrivée dans l'espace.
@@ -37,12 +31,7 @@ export function PushPrompt({ vapidKey }: { vapidKey?: string }) {
 
     // Déjà autorisé : on (ré)enregistre l'abonnement silencieusement.
     if (Notification.permission === "granted") {
-      navigator.serviceWorker.ready
-        .then(async (reg) => {
-          const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) }));
-          await savePushSubscriptionAction(sub.toJSON(), navigator.userAgent);
-        })
-        .catch(() => {});
+      subscribeDevice(vapidKey).catch(() => {});
       return;
     }
     if (Notification.permission === "default" && !dismissed) {
@@ -74,10 +63,8 @@ export function PushPrompt({ vapidKey }: { vapidKey?: string }) {
           setVisible(false);
           return;
         }
-        const reg = await navigator.serviceWorker.ready;
-        const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey!) }));
-        const res = await savePushSubscriptionAction(sub.toJSON(), navigator.userAgent);
-        if (res.ok) toast.success("Notifications activées", { description: "Paiement, ouverture du défi, rappels : vous serez prévenu." });
+        const ok = await subscribeDevice(vapidKey!);
+        if (ok) toast.success("Notifications activées", { description: "Paiement, ouverture du défi, rappels : vous serez prévenu." });
         else toast.error("Enregistrement impossible. Réessayez plus tard.");
       } catch {
         toast.error("Votre navigateur a refusé l'abonnement aux notifications.");

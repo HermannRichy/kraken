@@ -1,6 +1,7 @@
 import "server-only";
 
 import { headers } from "next/headers";
+import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 
 import { adminGate } from "@/lib/admin-path";
@@ -10,12 +11,11 @@ import { roles, type Role } from "@/lib/permissions";
 
 import { db } from "./db";
 
-export async function getSession() {
-  return auth.api.getSession({ headers: await headers() });
-}
+/** Session de la requête (dédupliquée entre layout et page). */
+export const getSession = cache(async () => auth.api.getSession({ headers: await headers() }));
 
-/** Participant connecté (sinon redirection vers la connexion). */
-export async function requireParticipant() {
+/** Participant connecté (sinon redirection vers la connexion). Dédupliqué par requête. */
+export const requireParticipant = cache(async () => {
   const session = await getSession();
   if (!session) redirect("/connexion");
   const participant = await db.participant.findUnique({ where: { userId: session.user.id } });
@@ -29,7 +29,7 @@ export async function requireParticipant() {
     return { session, participant: updated };
   }
   return { session, participant };
-}
+});
 
 type Permission = { [K in keyof (typeof roles)["admin"]["statements"]]?: string[] };
 

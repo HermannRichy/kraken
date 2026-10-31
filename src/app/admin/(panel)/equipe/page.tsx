@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { InviteStaffForm, StaffRoleSelect } from "@/components/admin/staff-forms";
-import { fmtDate, PageHeader, Panel } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel } from "@/components/dashboard/ui";
 import { db } from "@/lib/server/db";
 import { requireStaff } from "@/lib/server/session";
 
