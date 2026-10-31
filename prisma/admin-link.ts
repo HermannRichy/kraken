@@ -2,6 +2,9 @@
  * Lien d'activation (ou de réinitialisation) d'un compte d'équipe, sans passer par l'e-mail.
  *   pnpm admin:link                      → compte FIRST_ADMIN_EMAIL
  *   pnpm admin:link autre@domaine.com    → autre membre de l'équipe
+ *   pnpm admin:reset [email]             → remise à zéro complète avant le lien : mot de passe,
+ *                                          double authentification et sessions supprimés
+ *                                          (pour qu'une autre personne active le compte depuis le début)
  * Affiche aussi un diagnostic (mot de passe, 2FA, derniers e-mails envoyés).
  * Le lien est valable 1 heure et utilisable une seule fois. Ne le partagez qu'avec la personne concernée.
  */
@@ -19,10 +22,23 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 const token = () => Array.from(randomBytes(32), (b) => ALPHABET[b % ALPHABET.length]).join("").slice(0, 32);
 
 async function main() {
-  const email = (process.argv[2] ?? process.env.FIRST_ADMIN_EMAIL ?? "kraken@hustlerlabs.tech").trim().toLowerCase();
+  const args = process.argv.slice(2);
+  const reset = args.includes("--reset");
+  const email = (args.find((a) => !a.startsWith("--")) ?? process.env.FIRST_ADMIN_EMAIL ?? "kraken@hustlerlabs.tech").trim().toLowerCase();
   const user = await db.user.findUnique({ where: { email } });
   if (!user) throw new Error(`Aucun compte pour ${email}. Lancez d'abord : pnpm db:seed`);
   if (user.role !== "admin" && user.role !== "moderator") throw new Error(`${email} n'est pas un compte d'équipe (rôle : ${user.role}).`);
+
+  if (reset) {
+    await db.$transaction([
+      db.twoFactor.deleteMany({ where: { userId: user.id } }),
+      db.session.deleteMany({ where: { userId: user.id } }),
+      db.account.deleteMany({ where: { userId: user.id, providerId: "credential" } }),
+      db.verification.deleteMany({ where: { value: user.id, identifier: { startsWith: "reset-password:" } } }),
+      db.user.update({ where: { id: user.id }, data: { twoFactorEnabled: false } }),
+    ]);
+    console.log("\nRemise à zéro effectuée : mot de passe, double authentification, sessions et anciens liens supprimés.");
+  }
 
   const [credential, emails] = await Promise.all([
     db.account.findFirst({ where: { userId: user.id, providerId: "credential" }, select: { id: true } }),
@@ -31,7 +47,7 @@ async function main() {
 
   console.log(`\nCompte       : ${email} (${user.role})`);
   console.log(`Mot de passe : ${credential ? "défini" : "non défini (compte à activer)"}`);
-  console.log(`2FA          : ${user.twoFactorEnabled ? "active" : "à activer après la connexion"}`);
+  console.log(`2FA          : ${user.twoFactorEnabled && !reset ? "active (le code sera demandé à la connexion)" : "à activer après la connexion (QR code)"}`);
   console.log(`Brevo        : ${process.env.BREVO_API_KEY ? "clé présente" : "BREVO_API_KEY absente : aucun e-mail ne part"}`);
   console.log("Derniers e-mails :");
   if (!emails.length) console.log("  aucun envoi enregistré pour cette adresse");

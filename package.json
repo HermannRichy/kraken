@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "admin:link": "tsx prisma/admin-link.ts"
+    "admin:link": "tsx prisma/admin-link.ts",
+    "admin:reset": "tsx prisma/admin-link.ts --reset"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
