@@ -125,6 +125,7 @@ En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérif
 2. Renseigner toutes les variables de `.env.example` dans Vercel.
 3. `vercel env pull .env` puis `pnpm db:migrate` et `pnpm db:seed` (une fois).
    Avec `FIRST_ADMIN_PASSWORD` vide, le vrai admin active son compte lui-même : `/<ADMIN_PATH>` → « Première connexion : activer mon compte » → lien reçu sur `FIRST_ADMIN_EMAIL` → choix du mot de passe → double authentification.
+   Si l'e-mail n'arrive pas : `pnpm admin:link` (ou `pnpm admin:link membre@domaine.com`) affiche un diagnostic (mot de passe, 2FA, Brevo, derniers e-mails) et génère un lien d'activation à usage unique, valable 1 h.
 4. **Brevo** : valider l'expéditeur `kraken@hustlerlabs.tech` et authentifier le domaine (SPF, DKIM, DMARC), puis créer une clé API.
 5. **FeexPay** : webhook `https://kraken.hustlerlabs.tech/api/webhooks/feexpay`, en-tête `Authorization` de type Bearer = `FEEXPAY_WEBHOOK_SECRET`. `FEEXPAY_MODE=mock` simule les paiements en local (refus si le numéro finit par 00).
 6. **Cron** : `vercel.json` appelle `/api/cron/reconcile` une fois par jour (3 h UTC, limite du plan Hobby) (Vercel envoie `Authorization: Bearer $CRON_SECRET`) pour rattraper les paiements sans webhook.
