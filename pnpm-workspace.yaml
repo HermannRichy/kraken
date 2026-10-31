@@ -1,0 +1,15 @@
+# Dépendances autorisées à exécuter leurs scripts d'installation.
+# pnpm 11 : allowBuilds · pnpm 10 : onlyBuiltDependencies
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - prisma
+  - esbuild
+  - sharp
+  - unrs-resolver
