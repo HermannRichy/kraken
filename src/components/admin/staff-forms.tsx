@@ -1,12 +1,11 @@
 "use client";
 
 import QRCode from "qrcode";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { inviteStaffAction, setSeatsCapAction, setStaffRoleAction } from "@/app/admin/actions";
-import { SelectField, SubmitButton, TextField } from "@/components/form/fields";
+import { OtpInput, PasswordField, SelectField, SubmitButton, TextField } from "@/components/form/fields";
 import { authClient } from "@/lib/auth-client";
 
 export function InviteStaffForm() {
@@ -27,7 +26,7 @@ export function InviteStaffForm() {
           } else toast.error(res.error);
         });
       }}
-      className="grid gap-4 sm:grid-cols-[1fr_1fr_200px_auto] sm:items-end"
+      className="grid gap-4 md:grid-cols-2 md:items-end 2xl:grid-cols-[1fr_1fr_200px_auto]"
     >
       <TextField label="Nom" value={name} onChange={(e) => setName(e.target.value)} required />
       <TextField label="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -35,7 +34,7 @@ export function InviteStaffForm() {
         <option value="moderator">Modérateur</option>
         <option value="admin">Administrateur</option>
       </SelectField>
-      <SubmitButton pending={pending} className="min-h-[52px]">
+      <SubmitButton pending={pending} className="min-h-[52px] w-full 2xl:w-auto">
         Inviter
       </SubmitButton>
     </form>
@@ -89,8 +88,8 @@ export function SeatsCapForm({ value }: { value: number }) {
       }}
       className="flex flex-wrap items-end gap-3"
     >
-      <TextField label="Plafond de places" type="number" inputMode="numeric" min={1} max={10000} value={cap} onChange={(e) => setCap(e.target.value)} className="w-48" />
-      <SubmitButton pending={pending} className="min-h-[52px]">
+      <TextField label="Plafond de places" type="number" inputMode="numeric" min={1} max={10000} value={cap} onChange={(e) => setCap(e.target.value)} className="w-full sm:w-48" />
+      <SubmitButton pending={pending} className="min-h-[52px] w-full sm:w-auto">
         Enregistrer
       </SubmitButton>
     </form>
@@ -99,13 +98,28 @@ export function SeatsCapForm({ value }: { value: number }) {
 
 /** Activation de la double authentification (TOTP) avec QR code et codes de secours. */
 export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [uri, setUri] = useState<string | null>(null);
   const [qr, setQr] = useState<string | null>(null);
   const [backup, setBackup] = useState<string[]>([]);
   const [code, setCode] = useState("");
   const [pending, startTransition] = useTransition();
+
+  const confirm = (value: string) => {
+    if (!/^\d{6}$/.test(value) || pending) return;
+    startTransition(async () => {
+      const { error } = await authClient.twoFactor.verifyTotp({ code: value });
+      if (error) {
+        setCode("");
+        toast.error("Code incorrect.");
+        return;
+      }
+      toast.success("Double authentification activée");
+      // Rechargement complet : la session porte désormais la 2FA.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- rechargement voulu (nouvel état de session)
+      window.setTimeout(() => window.location.assign("/admin"), 600);
+    });
+  };
 
   useEffect(() => {
     if (!uri) return;
@@ -138,8 +152,8 @@ export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
         className="flex flex-col gap-4"
       >
         <p className="font-semibold">Obligatoire pour accéder à l&apos;administration. Confirmez votre mot de passe pour commencer.</p>
-        <TextField label="Mot de passe" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <SubmitButton pending={pending} className="self-start">
+        <PasswordField label="Mot de passe" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="max-w-[420px]" />
+        <SubmitButton pending={pending} className="w-full sm:w-auto sm:self-start">
           Activer la double authentification
         </SubmitButton>
       </form>
@@ -152,10 +166,10 @@ export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
         <li>Notez les codes de secours dans un endroit sûr.</li>
         <li>Saisissez le code à 6 chiffres affiché pour valider.</li>
       </ol>
-      <div className="flex flex-wrap gap-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {qr && <img src={qr} alt="QR code de double authentification" width={220} height={220} className="rounded-xl border-[3px] border-ink" />}
-        <div className="grid grid-cols-2 gap-2 self-start font-mono text-sm">
+        {qr && <img src={qr} alt="QR code de double authentification" width={220} height={220} className="size-[220px] self-center rounded-xl border-[3px] border-ink sm:self-start" />}
+        <div className="grid grid-cols-2 gap-2 self-stretch font-mono text-sm sm:self-start">
           {backup.map((c) => (
             <code key={c} className="rounded-lg border-2 border-ink bg-paper px-2 py-1">
               {c}
@@ -166,21 +180,12 @@ export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          startTransition(async () => {
-            const { error } = await authClient.twoFactor.verifyTotp({ code: code.replace(/\s/g, "") });
-            if (error) {
-              toast.error("Code incorrect.");
-              return;
-            }
-            toast.success("Double authentification activée");
-            router.push("/admin");
-            router.refresh();
-          });
+          confirm(code);
         }}
-        className="flex flex-wrap items-end gap-3"
+        className="flex flex-col gap-4"
       >
-        <TextField label="Code à 6 chiffres" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} className="w-48" maxLength={7} />
-        <SubmitButton pending={pending} className="min-h-[52px]">
+        <OtpInput value={code} onChange={setCode} onComplete={confirm} disabled={pending} hint="Le code affiché par l'application pour « Kraken by HustlerLabs »." />
+        <SubmitButton pending={pending} tone="black" className="w-full sm:w-auto sm:self-start">
           Valider
         </SubmitButton>
       </form>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { Panel, Stat, STATUS_LABELS } from "@/components/admin/ui";
+import { PageHeader, Panel, Stat, STATUS_LABELS } from "@/components/admin/ui";
 import { countryName } from "@/config/countries";
 import { LEVELS } from "@/lib/validation";
 import { db } from "@/lib/server/db";
@@ -35,33 +35,35 @@ async function Dashboard() {
   const max = Math.max(1, ...days.map((d) => d.n));
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Tableau de bord</h1>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+    <div className="flex flex-col gap-6 sm:gap-8">
+      <PageHeader title="Tableau de bord" description="Vue d'ensemble des inscriptions et des paiements." />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
         <Stat label="Inscriptions" value={total} />
         <Stat label="Inscrits payés" value={count("registered")} tone="blue" />
         <Stat label="Places restantes" value={Math.max(0, cap - taken)} tone="black" hint={`sur ${cap}`} />
         <Stat label="E-mails non confirmés" value={count("pre_registered")} />
-        <Stat label="Encaissé" value={`${(paidSum._sum.amount ?? 0).toLocaleString("fr-FR")} F`} hint={`${paidSum._count} paiement(s)`} />
+        <Stat label="Encaissé" value={`${(paidSum._sum.amount ?? 0).toLocaleString("fr-FR")} F`} hint={`${paidSum._count} paiement(s)`} className="col-span-2 md:col-span-1" />
       </div>
 
       <Panel title="Inscriptions par jour (14 jours)">
-        <div className="flex h-48 items-end gap-1.5 sm:gap-2" role="img" aria-label="Histogramme des inscriptions par jour">
-          {days.map((d) => (
-            <div key={d.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
-              <span className="text-xs font-extrabold">{d.n || ""}</span>
-              <div className="w-full rounded-t-lg border-[3px] border-ink bg-kraken" style={{ height: `${Math.max(4, (d.n / max) * 100)}%` }} />
-              <span className="text-[10px] font-bold text-steel">{d.label}</span>
+        <div className="flex h-44 items-end gap-1 sm:h-52 sm:gap-2" role="img" aria-label="Histogramme des inscriptions par jour">
+          {days.map((d, i) => (
+            <div key={d.label} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
+              <span className="text-[11px] font-extrabold sm:text-xs">{d.n || ""}</span>
+              <div className="w-full rounded-t-md border-2 border-ink bg-kraken sm:rounded-t-lg sm:border-[3px]" style={{ height: `${Math.max(4, (d.n / max) * 100)}%` }} />
+              <span className="relative h-3.5 w-full">
+                <span className={`absolute left-1/2 -translate-x-1/2 text-[10px] font-bold whitespace-nowrap text-steel ${i % 2 ? "max-sm:hidden" : ""}`}>{d.label}</span>
+              </span>
             </div>
           ))}
         </div>
       </Panel>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
         <Panel title="Par statut">
           <ul className="flex flex-col gap-2">
             {Object.keys(STATUS_LABELS).map((s) => (
-              <li key={s} className="flex justify-between gap-3 text-sm font-bold">
+              <li key={s} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm font-bold">
                 <span>{STATUS_LABELS[s]}</span>
                 <span className="font-extrabold">{count(s)}</span>
               </li>
@@ -71,7 +73,7 @@ async function Dashboard() {
         <Panel title="Par pays">
           <ul className="flex flex-col gap-2">
             {byCountry.map((c) => (
-              <li key={c.country} className="flex justify-between gap-3 text-sm font-bold">
+              <li key={c.country} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm font-bold">
                 <span>{countryName(c.country)}</span>
                 <span className="font-extrabold">{c._count}</span>
               </li>
@@ -82,7 +84,7 @@ async function Dashboard() {
         <Panel title="Par niveau">
           <ul className="flex flex-col gap-2">
             {LEVELS.map((l) => (
-              <li key={l.value} className="flex justify-between gap-3 text-sm font-bold">
+              <li key={l.value} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm font-bold">
                 <span>{l.label}</span>
                 <span className="font-extrabold">{byLevel.find((b) => b.level === l.value)?._count ?? 0}</span>
               </li>

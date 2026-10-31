@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { NoteForm, ParticipantActions } from "@/components/admin/participant-actions";
-import { fmtDate, Panel, StatusBadge } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
 import { countryName } from "@/config/countries";
 import { NETWORKS } from "@/config/payment";
 import { LEVELS } from "@/lib/validation";
@@ -39,22 +39,29 @@ async function Detail({ params }: { params: PageProps<"/admin/participants/[id]"
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/admin/participants" className="self-start text-sm font-extrabold underline">
-        ← Participants
-      </Link>
-      <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">{p.fullName}</h1>
-        <StatusBadge status={p.status} />
-      </div>
+      <PageHeader
+        back={
+          <Link href="/admin/participants" className="inline-flex min-h-10 items-center self-start text-sm font-extrabold underline underline-offset-4">
+            ← Participants
+          </Link>
+        }
+        title={p.fullName}
+        description={
+          <span className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={p.status} />
+            <span className="font-mono text-ink">@{p.githubLogin}</span>
+          </span>
+        }
+      />
 
       <Panel title="Actions">
         <ParticipantActions participantId={p.id} emailVerified={p.user.emailVerified} status={p.status} perms={perms} />
         {p.disqualifiedReason && <p className="text-sm font-bold">Motif de disqualification : {p.disqualifiedReason}</p>}
       </Panel>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-5 sm:gap-6 xl:grid-cols-2">
         <Panel title="Informations">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+          <dl className="grid grid-cols-1 gap-y-0.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4 sm:gap-y-2">
             {[
               ["E-mail", `${p.email}${p.user.emailVerified ? " ✓" : " (non confirmé)"}`],
               ["Téléphone", p.phone],
@@ -68,7 +75,7 @@ async function Detail({ params }: { params: PageProps<"/admin/participants/[id]"
               ["Clés émises", p.keysIssuedAt ? fmtDate(p.keysIssuedAt) : "-"],
             ].map(([k, v]) => (
               <div key={k} className="contents">
-                <dt className="font-bold text-steel">{k}</dt>
+                <dt className="mt-2 font-bold text-steel first:mt-0 sm:mt-0">{k}</dt>
                 <dd className="font-extrabold break-all">{v}</dd>
               </div>
             ))}
@@ -78,7 +85,7 @@ async function Detail({ params }: { params: PageProps<"/admin/participants/[id]"
         <Panel title="Consentements">
           <ul className="flex flex-col gap-2 text-sm">
             {p.consents.map((c) => (
-              <li key={c.id} className="flex justify-between gap-3">
+              <li key={c.id} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                 <span className="font-bold">{CONSENTS[c.kind]}</span>
                 <span className="text-steel">
                   v{c.version} · {fmtDate(c.acceptedAt)}
@@ -112,7 +119,7 @@ async function Detail({ params }: { params: PageProps<"/admin/participants/[id]"
         <Panel title="E-mails envoyés">
           <ul className="flex flex-col gap-2 text-sm">
             {p.emailLogs.map((e) => (
-              <li key={e.id} className="flex justify-between gap-3">
+              <li key={e.id} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                 <span className="font-bold">{e.type}</span>
                 <span className={e.status === "failed" ? "font-bold text-[#C62828]" : "text-steel"}>
                   {e.status} · {fmtDate(e.createdAt)}
@@ -140,7 +147,7 @@ async function Detail({ params }: { params: PageProps<"/admin/participants/[id]"
         <Panel title="Historique (audit)">
           <ul className="flex flex-col gap-2 text-sm">
             {logs.map((l) => (
-              <li key={l.id} className="flex justify-between gap-3">
+              <li key={l.id} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                 <span className="font-bold">{l.action}</span>
                 <span className="text-steel">
                   {l.actor?.name ?? "système"} · {fmtDate(l.createdAt)}

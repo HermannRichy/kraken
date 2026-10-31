@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { InviteStaffForm, StaffRoleSelect } from "@/components/admin/staff-forms";
-import { fmtDate, Panel } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel } from "@/components/admin/ui";
 import { db } from "@/lib/server/db";
 import { requireStaff } from "@/lib/server/session";
 
@@ -10,7 +10,7 @@ async function Team() {
   const staff = await db.user.findMany({ where: { role: { in: ["admin", "moderator"] } }, orderBy: { createdAt: "asc" } });
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Équipe</h1>
+      <PageHeader title="Équipe" description="Administrateurs et modérateurs." />
       <Panel title="Inviter un membre">
         <InviteStaffForm />
         <p className="text-sm text-steel">Le membre reçoit un lien pour définir son mot de passe, puis active la double authentification à la première connexion.</p>
@@ -19,10 +19,10 @@ async function Team() {
         <ul className="flex flex-col divide-y divide-mist">
           {staff.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-              <div>
+              <div className="min-w-0">
                 <div className="font-extrabold">{u.name}</div>
                 <div className="text-sm text-steel">
-                  {u.email} · depuis {fmtDate(u.createdAt)} · 2FA {u.twoFactorEnabled ? "active" : "à activer"}
+                  <span className="break-all">{u.email}</span> · depuis {fmtDate(u.createdAt)} · 2FA {u.twoFactorEnabled ? "active" : "à activer"}
                 </div>
               </div>
               <StaffRoleSelect userId={u.id} role={u.role ?? "moderator"} self={u.id === session.user.id} />

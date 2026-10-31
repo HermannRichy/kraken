@@ -101,7 +101,7 @@ Les informations encore inconnues sont entre crochets dans le code : `[XX]` (pla
 3. `/espace` : paiement Mobile Money FeexPay (2 000 FCFA, clé d'idempotence, attribution des places sous verrou), suivi en direct, puis clés de test chiffrées (AES-256-GCM), révélation et régénération consignées. Invitation aux notifications push à l'arrivée.
 4. Plus de place : liste d'attente automatique.
 
-Connexion participant : `/connexion` (lien magique 15 min). Équipe : `/admin/connexion` (mot de passe + double authentification obligatoire, configurée sur `/admin/securite`).
+Connexion participant : `/connexion` (lien magique 15 min). Équipe : adresse secrète `/<ADMIN_PATH>` (mot de passe + double authentification obligatoire, configurée sur `/admin/securite`). Avec `ADMIN_PATH` défini, `/admin/connexion` et toute page `/admin` sans session répondent 404 ; l'adresse n'apparaît nulle part sur le site.
 
 ### Administration (`/admin`)
 
@@ -115,7 +115,7 @@ Tableau de bord, participants (recherche, filtres, fiche, notes, renvoi d'e-mail
 
 ### Sécurité
 
-En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérification d'origine sur les routes API ; limitation de débit en base (IP hachée avec sel, jamais stockée en clair) ; validation zod côté client et serveur ; sessions et 2FA better-auth ; ressources d'autrui renvoyées en 404 ; neutralisation des formules dans l'export CSV ; webhook FeexPay authentifié (comparaison à temps constant), statut revérifié auprès de l'API, traitement idempotent.
+En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérification d'origine sur les routes API ; limitation de débit en base (IP hachée avec sel, jamais stockée en clair) ; validation zod côté client et serveur ; Cloudflare Turnstile et champ piège sur l'inscription, le contact, le lien magique et la connexion de l'équipe ; sessions et 2FA better-auth ; ressources d'autrui renvoyées en 404 ; neutralisation des formules dans l'export CSV ; webhook FeexPay authentifié (comparaison à temps constant), statut revérifié auprès de l'API, traitement idempotent.
 
 ### Déploiement (Vercel + Neon)
 
@@ -125,7 +125,8 @@ En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérif
 4. **Brevo** : valider l'expéditeur `kraken@hustlerlabs.tech` et authentifier le domaine (SPF, DKIM, DMARC), puis créer une clé API.
 5. **FeexPay** : webhook `https://kraken.hustlerlabs.tech/api/webhooks/feexpay`, en-tête `Authorization` de type Bearer = `FEEXPAY_WEBHOOK_SECRET`. `FEEXPAY_MODE=mock` simule les paiements en local (refus si le numéro finit par 00).
 6. **Cron** : `vercel.json` appelle `/api/cron/reconcile` une fois par jour (3 h UTC, limite du plan Hobby) (Vercel envoie `Authorization: Bearer $CRON_SECRET`) pour rattraper les paiements sans webhook.
-7. **Push** : `pnpm dlx web-push generate-vapid-keys`.
+7. **Turnstile** : créer un widget (mode Managed) pour `kraken.hustlerlabs.tech`, renseigner `NEXT_PUBLIC_TURNSTILE_SITE_KEY` et `TURNSTILE_SECRET_KEY`, puis redéployer (la clé publique est intégrée à la compilation).
+8. **Push** : `pnpm dlx web-push generate-vapid-keys`.
 
 La migration initiale (`prisma/migrations`) a été écrite à la main : la vérifier une fois avec `pnpm prisma migrate dev` sur une base vide. En local, `EMAIL_LOG_TO_CONSOLE=true` affiche les e-mails dans la console au lieu de les envoyer.
 

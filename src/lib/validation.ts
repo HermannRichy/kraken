@@ -62,6 +62,7 @@ export const registrationSchema = z
     // Anti-spam
     website: z.string().max(0, "Champ invalide.").optional().or(z.literal("")),
     startedAt: z.number().int().positive(),
+    captcha: z.string().max(2048).optional(),
   })
   .superRefine((v, ctx) => {
     if (!isValidPhoneNumber(v.phone, v.phoneCountry as CountryCode)) {
@@ -83,6 +84,7 @@ export const contactSchema = z.object({
   message: trimmed(10, 3000, "Le message"),
   website: z.string().max(0).optional().or(z.literal("")),
   startedAt: z.number().int().positive(),
+  captcha: z.string().max(2048).optional(),
 });
 
 export type ContactInput = z.input<typeof contactSchema>;

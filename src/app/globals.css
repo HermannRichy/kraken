@@ -37,6 +37,14 @@
   }
 }
 
+/* Administration : en-tête, pied de page et « haut de page » du site masqués. */
+body:has([data-admin-shell]) .site-chrome {
+  display: none !important;
+}
+body:has([data-admin-shell]) > main {
+  overflow: visible;
+}
+
 /* Distorsions : trapèzes arrondis en perspective (cards, stickers, blocs de titre) */
 @utility distort-a {
   transform: perspective(1000px) rotateY(-8deg) rotateX(3deg) rotateZ(-1.5deg);

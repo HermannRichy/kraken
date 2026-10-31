@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { MagicLinkForm } from "@/components/features/magic-link-form";
@@ -39,9 +38,6 @@ export default function ConnexionPage(props: PageProps<"/connexion">) {
             <p data-reveal className="max-w-[520px] text-[17px] leading-normal font-semibold sm:text-xl">
               Pas de mot de passe : entrez votre e-mail, on vous envoie un lien de connexion à usage unique.
             </p>
-            <Link href="/admin/connexion" data-reveal className="self-start text-sm font-bold text-steel underline underline-offset-4">
-              Accès équipe
-            </Link>
           </div>
           <div className="w-full max-w-[520px] flex-[1_1_380px] rounded-[30px] border-4 border-ink bg-white p-6 shadow-[10px_10px_0_#000] sm:p-8">
             <Suspense fallback={<MagicLinkForm />}>

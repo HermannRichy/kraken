@@ -64,7 +64,7 @@ export function Header() {
     <header
       ref={root}
       className={cn(
-        "sticky top-0 z-40 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none",
+        "site-chrome sticky top-0 z-40 bg-white transition-transform duration-300 ease-out motion-reduce:transition-none",
         hidden && "-translate-y-full",
       )}
     >

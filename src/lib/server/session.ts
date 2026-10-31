@@ -1,7 +1,9 @@
 import "server-only";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+
+import { adminGate } from "@/lib/admin-path";
 
 import { auth } from "@/lib/auth";
 import { roles, type Role } from "@/lib/permissions";
@@ -34,9 +36,10 @@ type Permission = { [K in keyof (typeof roles)["admin"]["statements"]]?: string[
 /** Membre de l'équipe connecté, double authentification activée, avec la permission demandée. */
 export async function requireStaff(permission?: Permission, { allowWithout2fa = false } = {}) {
   const session = await getSession();
-  if (!session) redirect("/admin/connexion");
+  // Sans session ou sans rôle d'équipe : 404, l'administration ne se signale pas.
+  if (!session) return adminGate() ? notFound() : redirect("/admin/connexion");
   const role = (session.user.role ?? "participant") as Role;
-  if (role !== "admin" && role !== "moderator") redirect("/espace");
+  if (role !== "admin" && role !== "moderator") notFound();
   if (!allowWithout2fa && !session.user.twoFactorEnabled) redirect("/admin/securite");
   if (permission && !can(role, permission)) redirect("/admin?refus=1");
   return { session, role };

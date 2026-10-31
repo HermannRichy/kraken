@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { contactAction } from "@/app/organisateur/actions";
 import { SubmitButton, TextareaField, TextField } from "@/components/form/fields";
+import { CAPTCHA_WAIT, Turnstile, useCaptcha } from "@/components/form/turnstile";
 import { Pop } from "@/components/motion/pop";
 import { Burst } from "@/components/ui/doodles";
 import { contactSchema, fieldErrors } from "@/lib/validation";
@@ -16,6 +17,7 @@ export function ContactForm() {
   const [sent, setSent] = useState(false);
   const startedAt = useRef(0);
   const [pending, startTransition] = useTransition();
+  const captcha = useCaptcha();
 
   const set = (k: keyof typeof values, v: string) => {
     if (!startedAt.current) startedAt.current = Date.now();
@@ -25,11 +27,13 @@ export function ContactForm() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const input = { ...values, startedAt: startedAt.current || Date.now() };
+    const input = { ...values, startedAt: startedAt.current || Date.now(), captcha: captcha.token ?? undefined };
     const parsed = contactSchema.safeParse(input);
     if (!parsed.success) return setErrors(fieldErrors(parsed.error));
+    if (!captcha.ready) return setErrors({ captcha: CAPTCHA_WAIT });
     startTransition(async () => {
       const res = await contactAction(input);
+      captcha.reset();
       if (res.ok) {
         setSent(true);
         toast.success("Message envoyé", { description: "Un accusé de réception vient de partir dans votre boîte mail." });
@@ -63,6 +67,7 @@ export function ContactForm() {
             <TextField label="Nom complet" autoComplete="name" value={values.name} onChange={(e) => set("name", e.target.value)} error={errors.name} maxLength={80} required />
             <TextField label="E-mail" type="email" inputMode="email" autoComplete="email" value={values.email} onChange={(e) => set("email", e.target.value)} error={errors.email} maxLength={254} required />
             <TextareaField label="Message" value={values.message} onChange={(e) => set("message", e.target.value)} error={errors.message} maxLength={3000} hint={`${values.message.length}/3000`} required />
+            <Turnstile nonce={captcha.nonce} action="contact" onToken={captcha.setToken} error={errors.captcha} />
             <SubmitButton pending={pending} pendingLabel="Envoi…" className="self-start">
               Envoyer
             </SubmitButton>

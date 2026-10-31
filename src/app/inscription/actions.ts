@@ -9,6 +9,7 @@ import { db } from "@/lib/server/db";
 import { checkGithubUser } from "@/lib/server/participants";
 import { rateLimitAll, retryMessage } from "@/lib/server/rate-limit";
 import { getClientIp } from "@/lib/server/request";
+import { verifyTurnstile } from "@/lib/server/turnstile";
 import { CONSENT_VERSION, emailField, fieldErrors, registrationSchema, toE164, type RegistrationInput } from "@/lib/validation";
 
 export type RegisterResult = { ok: true; email: string } | { ok: false; message: string; errors?: Record<string, string> };
@@ -33,6 +34,9 @@ export async function registerAction(input: RegistrationInput): Promise<Register
   // Anti-robot : champ piège rempli ou formulaire envoyé trop vite.
   if (data.website || Date.now() - data.startedAt < MIN_FILL_MS) {
     return { ok: false, message: "Envoi refusé. Prenez le temps de remplir le formulaire." };
+  }
+  if (!(await verifyTurnstile(data.captcha, ip, "register"))) {
+    return { ok: false, message: "Vérification anti-robot échouée. Réessayez.", errors: { captcha: "Vérification anti-robot échouée. Réessayez." } };
   }
 
   const phone = toE164(data.phone, data.phoneCountry);

@@ -95,7 +95,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       </head>
       <body className="flex min-h-dvh flex-col">
-        <Suspense fallback={<div className="h-[110px] border-b-[3px] border-ink bg-white lg:h-[128px]" aria-hidden="true" />}>
+        <Suspense fallback={<div className="site-chrome h-[110px] border-b-[3px] border-ink bg-white lg:h-[128px]" aria-hidden="true" />}>
           <Header />
         </Suspense>
         <main className="flex-1 overflow-hidden">{children}</main>

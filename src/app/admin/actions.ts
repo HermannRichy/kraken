@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { SITE_URL } from "@/config/site";
+import { adminResetPath } from "@/lib/admin-path";
 import { auth } from "@/lib/auth";
 import { audit } from "@/lib/server/audit";
 import { db } from "@/lib/server/db";
@@ -117,7 +118,7 @@ export async function inviteStaffAction(input: { name: string; email: string; ro
     ? await db.user.update({ where: { id: existing.id }, data: { role } })
     : await db.user.create({ data: { id: randomUUID(), name, email, emailVerified: true, role } });
 
-  await auth.api.requestPasswordReset({ body: { email, redirectTo: `${SITE_URL}/admin/mot-de-passe` } });
+  await auth.api.requestPasswordReset({ body: { email, redirectTo: `${SITE_URL}${adminResetPath()}` } });
   await audit({ actorId: session.user.id, action: "staff.invite", targetType: "user", targetId: user.id, meta: { role } });
   revalidatePath("/admin/equipe");
   return { ok: true, message: `Invitation envoyée à ${email}.` };

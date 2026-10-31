@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { SubmitButton, TextField } from "@/components/form/fields";
+import { Honeypot, SubmitButton, TextField } from "@/components/form/fields";
+import { CAPTCHA_WAIT, Turnstile, useCaptcha } from "@/components/form/turnstile";
 import { authClient } from "@/lib/auth-client";
 import { emailField } from "@/lib/validation";
 
@@ -13,21 +14,30 @@ export function MagicLinkForm({ initialError }: { initialError?: string }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
   const [sent, setSent] = useState(false);
+  const [hp, setHp] = useState("");
   const [pending, startTransition] = useTransition();
+  const captcha = useCaptcha();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = emailField.safeParse(email);
     if (!parsed.success) return setError(parsed.error.issues[0]?.message);
+    if (!captcha.ready) return setError(CAPTCHA_WAIT);
     setError(undefined);
     startTransition(async () => {
-      const { error: err } = await authClient.signIn.magicLink({
-        email: parsed.data,
-        callbackURL: "/espace",
-        errorCallbackURL: "/connexion?erreur=lien",
-      });
+      // Robot (champ piège rempli) : même réponse, rien n'est envoyé.
+      if (hp) return setSent(true);
+      const { error: err } = await authClient.signIn.magicLink(
+        { email: parsed.data, callbackURL: "/espace", errorCallbackURL: "/connexion?erreur=lien" },
+        { headers: captcha.token ? { "x-captcha-response": captcha.token } : {} },
+      );
+      captcha.reset();
       if (err?.status === 429) {
         toast.error("Trop de demandes. Réessayez dans quelques minutes.");
+        return;
+      }
+      if (err?.status === 403 || (err?.status === 400 && /captcha/i.test(err.message ?? ""))) {
+        setError("Vérification anti-robot échouée. Réessayez.");
         return;
       }
       // Réponse identique que le compte existe ou non (pas d'énumération des comptes).
@@ -68,6 +78,8 @@ export function MagicLinkForm({ initialError }: { initialError?: string }) {
         error={error}
         required
       />
+      <Honeypot value={hp} onChange={setHp} />
+      <Turnstile nonce={captcha.nonce} action="login" onToken={captcha.setToken} />
       <SubmitButton pending={pending} pendingLabel="Envoi du lien…">
         Recevoir mon lien de connexion
       </SubmitButton>

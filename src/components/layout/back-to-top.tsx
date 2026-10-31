@@ -43,7 +43,7 @@ export function BackToTop() {
         tabIndex={visible ? 0 : -1}
         {...handlers}
         style={{ boxShadow: "5px 5px 0 #000", opacity: 0, visibility: "hidden" }}
-        className="fixed right-4 bottom-4 z-50 flex size-14 items-center justify-center rounded-[18px] border-[3px] border-ink bg-kraken text-white sm:right-6 sm:bottom-6 sm:size-16"
+        className="site-chrome fixed right-4 bottom-4 z-50 flex size-14 items-center justify-center rounded-[18px] border-[3px] border-ink bg-kraken text-white sm:right-6 sm:bottom-6 sm:size-16"
       >
         <AnimatedIcon name="arrow-up" size={26} loop={visible ? 2600 : undefined} />
       </button>

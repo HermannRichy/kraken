@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 
 import { SeatsCapForm } from "@/components/admin/staff-forms";
-import { Panel } from "@/components/admin/ui";
+import { PageHeader, Panel } from "@/components/admin/ui";
 import { getSeatsCap } from "@/lib/server/participants";
 import { isMockMode } from "@/lib/server/feexpay";
 import { requireStaff } from "@/lib/server/session";
+import { turnstileEnabled } from "@/lib/server/turnstile";
+import { adminGate } from "@/lib/admin-path";
 
 async function Settings() {
   await requireStaff({ settings: ["update"] });
@@ -15,10 +17,12 @@ async function Settings() {
     ["Secret du webhook FeexPay", Boolean(process.env.FEEXPAY_WEBHOOK_SECRET)],
     ["Notifications push (VAPID)", Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY)],
     ["Tâche de réconciliation (CRON_SECRET)", Boolean(process.env.CRON_SECRET)],
+    ["Anti-robot Cloudflare Turnstile", turnstileEnabled()],
+    ["Adresse de connexion secrète (ADMIN_PATH)", Boolean(adminGate())],
   ] as const;
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Réglages</h1>
+      <PageHeader title="Réglages" description="Places et état de la configuration." />
       <Panel title="Places">
         <SeatsCapForm value={cap} />
         <p className="text-sm text-steel">Au-delà du plafond, les nouveaux paiements basculent automatiquement en liste d&apos;attente.</p>
@@ -26,7 +30,7 @@ async function Settings() {
       <Panel title="Configuration">
         <ul className="flex flex-col gap-2">
           {checks.map(([label, ok]) => (
-            <li key={label} className="flex justify-between gap-3 text-sm font-bold">
+            <li key={label} className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-sm font-bold">
               <span>{label}</span>
               <span className={ok ? "text-kraken" : "text-[#C62828]"}>{ok ? "✓ Configuré" : "✗ À configurer"}</span>
             </li>

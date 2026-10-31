@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { registerAction, resendVerificationAction } from "@/app/inscription/actions";
 import { Checkbox, SelectField, Spinner, SubmitButton, TextField } from "@/components/form/fields";
+import { CAPTCHA_WAIT, Turnstile, useCaptcha } from "@/components/form/turnstile";
 import { FEATURED_COUNTRIES, OTHER_COUNTRIES } from "@/config/countries";
 import { fieldErrors, LEVELS, REFERRALS, registrationSchema, type RegistrationInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
@@ -88,6 +89,7 @@ export function RegistrationForm() {
   const [ghResult, setGhResult] = useState<{ login: string; exists: boolean } | null>(null);
   const [pending, startTransition] = useTransition();
   const summaryRef = useRef<HTMLDivElement>(null);
+  const captcha = useCaptcha();
   // Heure de première saisie (anti-robot), fixée au premier événement utilisateur.
   const startedAt = useRef(0);
 
@@ -153,9 +155,14 @@ export function RegistrationForm() {
       setServerErrors({ github: "Aucun compte GitHub ne correspond à cet identifiant." });
       return;
     }
+    if (!captcha.ready) {
+      setServerErrors({ captcha: CAPTCHA_WAIT });
+      return;
+    }
     setFormMessage(null);
     startTransition(async () => {
-      const res = await registerAction({ ...values, acceptRules: true, acceptTerms: true, acceptData: true, startedAt: startedAt.current || Date.now() } as RegistrationInput);
+      const res = await registerAction({ ...values, acceptRules: true, acceptTerms: true, acceptData: true, startedAt: startedAt.current || Date.now(), captcha: captcha.token ?? undefined } as RegistrationInput);
+      if (!res.ok) captcha.reset();
       if (res.ok) {
         setDone(res.email);
         toast.success("Inscription enregistrée", { description: "Confirmez votre adresse pour continuer." });
@@ -368,6 +375,8 @@ export function RegistrationForm() {
         />
         <Checkbox checked={Boolean(values.publicName)} onChange={(e) => set("publicName", e.target.checked)} label={<span className="text-steel">Facultatif : afficher mon nom (et non un pseudo) dans le classement public.</span>} />
       </Section>
+
+      <Turnstile nonce={captcha.nonce} action="register" onToken={captcha.setToken} error={serverErrors.captcha} className="max-w-[420px]" />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <SubmitButton pending={pending} pendingLabel="Inscription en cours…" className="w-full sm:w-auto">

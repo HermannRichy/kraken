@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { fmtDate, Panel, StatusBadge, STATUS_LABELS } from "@/components/admin/ui";
+import { fmtDate, PageHeader, Panel, StatusBadge, STATUS_LABELS } from "@/components/admin/ui";
 import { countryName } from "@/config/countries";
 import type { Prisma } from "@/generated/prisma/client";
 import { LEVELS } from "@/lib/validation";
@@ -50,24 +50,28 @@ async function List({ searchParams }: { searchParams: PageProps<"/admin/particip
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Participants</h1>
-        {can(role as Role, { participant: ["export"] }) && (
-          <a href={`/admin/participants/export${qs(1)}`} className="inline-flex min-h-11 items-center rounded-[14px] border-[3px] border-ink bg-white px-4 text-sm font-extrabold shadow-[3px_3px_0_#000]">
-            Exporter en CSV
-          </a>
-        )}
-      </div>
+      <PageHeader
+        title="Participants"
+        description={`${total} résultat${total > 1 ? "s" : ""}${q || status || level ? " (filtré)" : ""}`}
+        actions={
+          can(role as Role, { participant: ["export"] }) && (
+            <a href={`/admin/participants/export${qs(1)}`} className="inline-flex min-h-11 items-center rounded-[14px] border-[3px] border-ink bg-white px-4 text-sm font-extrabold shadow-[3px_3px_0_#000] transition-transform hover:-translate-y-0.5">
+              Exporter en CSV
+            </a>
+          )
+        }
+      />
 
-      <form className="flex flex-wrap gap-3" role="search">
+      <form className="grid grid-cols-2 gap-3 lg:flex lg:flex-wrap" role="search">
         <input
           name="q"
+          type="search"
           defaultValue={q}
           placeholder="Nom, e-mail, GitHub, téléphone…"
           aria-label="Rechercher"
-          className="min-h-12 min-w-[220px] flex-1 rounded-[14px] border-[3px] border-ink bg-white px-4 font-semibold outline-none focus:shadow-[3px_3px_0_#0047FF]"
+          className="col-span-2 min-h-12 min-w-0 rounded-[14px] border-[3px] border-ink bg-white px-4 text-base font-semibold outline-none focus:shadow-[3px_3px_0_#0047FF] lg:min-w-[240px] lg:flex-1"
         />
-        <select name="statut" defaultValue={status} aria-label="Statut" className="min-h-12 rounded-[14px] border-[3px] border-ink bg-white px-3 font-bold">
+        <select name="statut" defaultValue={status} aria-label="Statut" className="min-h-12 w-full min-w-0 rounded-[14px] border-[3px] border-ink bg-white px-3 text-base font-bold lg:w-auto">
           <option value="">Tous les statuts</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => (
             <option key={k} value={k}>
@@ -75,7 +79,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/admin/particip
             </option>
           ))}
         </select>
-        <select name="niveau" defaultValue={level} aria-label="Niveau" className="min-h-12 rounded-[14px] border-[3px] border-ink bg-white px-3 font-bold">
+        <select name="niveau" defaultValue={level} aria-label="Niveau" className="min-h-12 w-full min-w-0 rounded-[14px] border-[3px] border-ink bg-white px-3 text-base font-bold lg:w-auto">
           <option value="">Tous les niveaux</option>
           {LEVELS.map((l) => (
             <option key={l.value} value={l.value}>
@@ -83,12 +87,35 @@ async function List({ searchParams }: { searchParams: PageProps<"/admin/particip
             </option>
           ))}
         </select>
-        <button className="min-h-12 rounded-[14px] border-[3px] border-ink bg-ink px-5 font-extrabold text-white shadow-[3px_3px_0_#0047FF]">Filtrer</button>
+        <button className="col-span-2 min-h-12 rounded-[14px] border-[3px] border-ink bg-ink px-5 font-extrabold text-white shadow-[3px_3px_0_#0047FF] lg:col-span-1">Filtrer</button>
       </form>
 
-      <Panel>
-        <p className="text-sm font-bold text-steel">{total} participant(s)</p>
-        <div className="-mx-2 overflow-x-auto">
+      {/* Cartes (mobile, tablette et écrans moyens) */}
+      <ul className="grid gap-3 md:grid-cols-2 xl:hidden">
+        {rows.map((p) => (
+          <li key={p.id}>
+            <Link href={`/admin/participants/${p.id}`} className="flex h-full flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-white p-4 shadow-[4px_4px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-[17px] font-extrabold">{p.fullName}</div>
+                  <div className="truncate text-sm font-semibold text-steel">{p.email}</div>
+                </div>
+                <StatusBadge status={p.status} />
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] font-bold text-steel">
+                <span className="font-mono text-ink">@{p.githubLogin}</span>
+                <span>{countryName(p.country)}</span>
+                <span>{LEVELS.find((l) => l.value === p.level)?.label}</span>
+                <span>{fmtDate(p.createdAt)}</span>
+              </div>
+            </Link>
+          </li>
+        ))}
+        {rows.length === 0 && <li className="rounded-[20px] border-[3px] border-dashed border-ink bg-white p-8 text-center font-bold text-steel md:col-span-2">Aucun participant ne correspond.</li>}
+      </ul>
+
+      <Panel className={pages > 1 ? "" : "max-xl:hidden"}>
+        <div className="-mx-2 overflow-x-auto max-xl:hidden">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
               <tr className="border-b-[3px] border-ink text-xs tracking-[0.06em] uppercase">
@@ -129,9 +156,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/admin/particip
           </table>
         </div>
         {pages > 1 && (
-          <nav className="flex items-center justify-between gap-3" aria-label="Pagination">
+          <nav className="flex items-center justify-between gap-3 xl:border-t-[3px] xl:border-ink xl:pt-4" aria-label="Pagination">
             {page > 1 ? (
-              <Link href={`/admin/participants${qs(page - 1)}`} className="font-extrabold underline">
+              <Link href={`/admin/participants${qs(page - 1)}`} className="inline-flex min-h-11 items-center rounded-[12px] border-[3px] border-ink bg-white px-3 text-sm font-extrabold">
                 ← Précédent
               </Link>
             ) : (
@@ -141,7 +168,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/admin/particip
               Page {page} / {pages}
             </span>
             {page < pages ? (
-              <Link href={`/admin/participants${qs(page + 1)}`} className="font-extrabold underline">
+              <Link href={`/admin/participants${qs(page + 1)}`} className="inline-flex min-h-11 items-center rounded-[12px] border-[3px] border-ink bg-white px-3 text-sm font-extrabold">
                 Suivant →
               </Link>
             ) : (

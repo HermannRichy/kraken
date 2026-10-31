@@ -31,7 +31,7 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="border-t-[3px] border-ink bg-ink text-white">
+    <footer className="site-chrome border-t-[3px] border-ink bg-ink text-white">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-9 px-4 pt-14 pb-9 sm:px-6 lg:px-10">
         <div className="flex flex-wrap items-start justify-between gap-10">
           <div className="flex max-w-[360px] flex-col gap-4">

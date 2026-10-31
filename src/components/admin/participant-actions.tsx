@@ -68,7 +68,7 @@ export function ParticipantActions({ participantId, emailVerified, status, perms
             Motif (communiqué au participant)
             <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} maxLength={500} className="rounded-[12px] border-[3px] border-ink bg-white p-3 font-semibold" />
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <SubmitButton type="button" tone="black" pending={pending} className="min-h-11" onClick={() => run(() => disqualifyAction(participantId, reason))}>
               Confirmer la disqualification
             </SubmitButton>

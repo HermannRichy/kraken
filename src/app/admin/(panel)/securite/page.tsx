@@ -1,14 +1,14 @@
 import { Suspense } from "react";
 
 import { TwoFactorSetup } from "@/components/admin/staff-forms";
-import { Panel } from "@/components/admin/ui";
+import { PageHeader, Panel } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/server/session";
 
 async function Security() {
   const { session } = await requireStaff(undefined, { allowWithout2fa: true });
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-4xl font-extrabold tracking-[-0.04em] sm:text-5xl">Sécurité</h1>
+      <PageHeader title="Sécurité" description="Protégez l'accès à votre compte." />
       <Panel title="Double authentification">
         <TwoFactorSetup enabled={Boolean(session.user.twoFactorEnabled)} />
       </Panel>

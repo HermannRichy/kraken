@@ -2,8 +2,9 @@ import "server-only";
 
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { admin, magicLink, twoFactor } from "better-auth/plugins";
+import { admin, captcha, magicLink, twoFactor } from "better-auth/plugins";
 
 import { SITE_URL } from "@/config/site";
 import { ac, roles } from "@/lib/permissions";
@@ -14,6 +15,10 @@ import { env } from "@/lib/server/env";
 import { allowedOrigins } from "@/lib/server/request";
 
 const isProd = process.env.NODE_ENV === "production";
+const turnstileSecret = process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? process.env.TURNSTILE_SECRET_KEY : null;
+
+/** Formulaires de connexion exposés aux robots : pot de miel (en-tête) + Turnstile. */
+const BOT_GUARDED = ["/sign-in/email", "/sign-in/magic-link", "/request-password-reset"];
 
 export const auth = betterAuth({
   appName: "Kraken : Sold Out",
@@ -93,6 +98,14 @@ export const auth = betterAuth({
     defaultCookieAttributes: { sameSite: "lax", httpOnly: true, secure: isProd },
   },
 
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (!BOT_GUARDED.includes(ctx.path)) return;
+      // Pot de miel : un champ invisible rempli trahit un robot.
+      if (ctx.headers?.get("x-kraken-hp")) throw new APIError("BAD_REQUEST", { message: "Requête refusée." });
+    }),
+  },
+
   databaseHooks: {
     user: {
       create: {
@@ -125,6 +138,8 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({ issuer: "Kraken by HustlerLabs" }),
+    // Cloudflare Turnstile (en-tête x-captcha-response), actif dès que les clés sont configurées.
+    ...(turnstileSecret ? [captcha({ provider: "cloudflare-turnstile", secretKey: turnstileSecret, endpoints: BOT_GUARDED })] : []),
     nextCookies(),
   ],
 });
