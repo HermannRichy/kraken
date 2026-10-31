@@ -124,7 +124,7 @@ En-têtes CSP, HSTS, COOP/CORP, `X-Frame-Options`, `Permissions-Policy` ; vérif
 3. `vercel env pull .env` puis `pnpm db:migrate` et `pnpm db:seed` (une fois).
 4. **Brevo** : valider l'expéditeur `kraken@hustlerlabs.tech` et authentifier le domaine (SPF, DKIM, DMARC), puis créer une clé API.
 5. **FeexPay** : webhook `https://kraken.hustlerlabs.tech/api/webhooks/feexpay`, en-tête `Authorization` de type Bearer = `FEEXPAY_WEBHOOK_SECRET`. `FEEXPAY_MODE=mock` simule les paiements en local (refus si le numéro finit par 00).
-6. **Cron** : `vercel.json` appelle `/api/cron/reconcile` toutes les 5 minutes (Vercel envoie `Authorization: Bearer $CRON_SECRET`) pour rattraper les paiements sans webhook.
+6. **Cron** : `vercel.json` appelle `/api/cron/reconcile` une fois par jour (3 h UTC, limite du plan Hobby) (Vercel envoie `Authorization: Bearer $CRON_SECRET`) pour rattraper les paiements sans webhook.
 7. **Push** : `pnpm dlx web-push generate-vapid-keys`.
 
 La migration initiale (`prisma/migrations`) a été écrite à la main : la vérifier une fois avec `pnpm prisma migrate dev` sur une base vide. En local, `EMAIL_LOG_TO_CONSOLE=true` affiche les e-mails dans la console au lieu de les envoyer.
