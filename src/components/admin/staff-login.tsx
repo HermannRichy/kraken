@@ -9,7 +9,7 @@ import { CAPTCHA_WAIT, Turnstile, useCaptcha } from "@/components/form/turnstile
 import { authClient } from "@/lib/auth-client";
 import { emailField } from "@/lib/validation";
 
-type Step = "password" | "totp" | "forgot";
+type Step = "password" | "totp" | "forgot" | "activate";
 
 /** En-têtes anti-robot transmis à better-auth (pot de miel + jeton Turnstile). */
 const botHeaders = (hp: string, token: string | null) => ({ ...(hp ? { "x-kraken-hp": hp } : {}), ...(token ? { "x-captcha-response": token } : {}) });
@@ -81,7 +81,7 @@ export function StaffLogin({ startAt2fa = false, resetPath }: { startAt2fa?: boo
     startTransition(async () => {
       if (!hp) await authClient.requestPasswordReset({ email, redirectTo: resetPath }, { headers: botHeaders(hp, captcha.token) });
       captcha.reset();
-      toast.success("Si un compte d'équipe existe, un lien vient d'être envoyé.");
+      toast.success("Si un compte d'équipe existe, un lien vient d'être envoyé.", { description: "Pensez à vérifier les courriers indésirables." });
       setStep("password");
     });
   };
@@ -130,19 +130,23 @@ export function StaffLogin({ startAt2fa = false, resetPath }: { startAt2fa?: boo
       </form>
     );
 
-  if (step === "forgot")
+  if (step === "forgot" || step === "activate")
     return (
       <form onSubmit={forgot} noValidate className="flex flex-col gap-5">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-[-0.02em]">Mot de passe oublié</h2>
-          <p className="mt-1 text-[15px] font-semibold text-steel">Un lien valable 1 heure vous sera envoyé.</p>
+          <h2 className="text-2xl font-extrabold tracking-[-0.02em]">{step === "activate" ? "Activer mon compte" : "Mot de passe oublié"}</h2>
+          <p className="mt-1 text-[15px] font-semibold text-steel">
+            {step === "activate"
+              ? "Saisissez l'adresse de votre compte d'équipe. Vous recevrez un lien (valable 1 heure) pour choisir votre mot de passe, puis vous activerez la double authentification."
+              : "Un lien valable 1 heure vous sera envoyé."}
+          </p>
         </div>
         {alert}
         <Honeypot value={hp} onChange={setHp} />
         <TextField label="E-mail" type="email" inputMode="email" autoComplete="username" autoCapitalize="none" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Turnstile nonce={captcha.nonce} action="admin_reset" onToken={captcha.setToken} />
         <SubmitButton pending={pending} tone="black" className="w-full">
-          Recevoir un lien
+          {step === "activate" ? "Recevoir mon lien d'activation" : "Recevoir un lien"}
         </SubmitButton>
         <button type="button" onClick={() => setStep("password")} className="self-start text-sm font-extrabold underline underline-offset-4">
           ← Retour
@@ -161,9 +165,14 @@ export function StaffLogin({ startAt2fa = false, resetPath }: { startAt2fa?: boo
       <SubmitButton pending={pending} tone="black" pendingLabel="Connexion…" className="w-full">
         Se connecter
       </SubmitButton>
-      <button type="button" onClick={() => setStep("forgot")} className="self-start text-sm font-extrabold underline underline-offset-4">
-        Mot de passe oublié ?
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <button type="button" onClick={() => setStep("forgot")} className="text-sm font-extrabold underline underline-offset-4">
+          Mot de passe oublié ?
+        </button>
+        <button type="button" onClick={() => setStep("activate")} className="text-sm font-extrabold text-kraken underline underline-offset-4">
+          Première connexion : activer mon compte
+        </button>
+      </div>
     </form>
   );
 }

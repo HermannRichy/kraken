@@ -1,8 +1,8 @@
 /**
  * Crée (ou met à jour) le premier administrateur.
  *   FIRST_ADMIN_EMAIL=kraken@hustlerlabs.tech FIRST_ADMIN_PASSWORD=... npm run db:seed
- * Sans FIRST_ADMIN_PASSWORD, le compte est créé sans mot de passe : utiliser
- * « Mot de passe oublié » sur /admin/connexion pour le définir.
+ * Sans FIRST_ADMIN_PASSWORD (recommandé), le compte est créé sans mot de passe : l'admin
+ * l'active lui-même depuis la page de connexion de l'équipe → « Première connexion : activer mon compte ».
  */
 import "dotenv/config";
 
@@ -34,7 +34,11 @@ async function main() {
   }
 
   await db.appSetting.upsert({ where: { key: "seatsCap" }, create: { key: "seatsCap", value: 100 }, update: {} });
-  console.log(`Admin prêt : ${email}${password ? " (mot de passe défini)" : " (définir le mot de passe via « Mot de passe oublié »)"}`);
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://kraken.hustlerlabs.tech").replace(/\/$/, "");
+  const gate = process.env.ADMIN_PATH?.trim().replace(/^\/+|\/+$/g, "");
+  const loginUrl = `${site}/${gate || "admin/connexion"}`;
+  console.log(`Admin prêt : ${email}`);
+  console.log(password ? `Mot de passe défini. Connexion : ${loginUrl}` : `Activation par l'admin : ${loginUrl} → « Première connexion : activer mon compte » (le lien arrivera sur ${email}).`);
 }
 
 main()
