@@ -39,7 +39,7 @@ export default function OrganisateurPage() {
             </Highlight>
           </h1>
           <p data-reveal className="max-w-[620px] text-[17px] leading-normal font-semibold sm:text-xl">
-            Kraken est une série de défis back-end portée par HustlerLabs. « Sold Out » en est la première édition.
+            Kraken est la série de défis back-end de HustlerLabs. La première édition a pour thème « Sold Out ».
           </p>
         </Container>
       </section>
@@ -49,7 +49,7 @@ export default function OrganisateurPage() {
           <div className="flex min-w-0 flex-[1_1_460px] flex-col gap-7">
             <H2>HustlerLabs</H2>
             <p data-reveal className="text-base leading-relaxed font-semibold text-steel sm:text-lg">
-              [Présentation de HustlerLabs : mission, équipe, éditions passées et à venir.]
+              HustlerLabs est un studio basé à Cotonou qui conçoit des logiciels sur mesure, des agents IA et des solutions de digitalisation. Une équipe de deux développeurs et d&apos;un designer, au service de projets en Afrique de l&apos;Ouest et en Europe.
             </p>
             <div className="flex flex-col gap-6 px-1 py-2">
               <Pop>
@@ -71,7 +71,7 @@ export default function OrganisateurPage() {
               </Pop>
               <Pop>
                 <a
-                  href="#contact-form"
+                  href={`mailto:${CHALLENGE.contactEmail}`}
                   className="distort-b flex items-center gap-[18px] rounded-[26px] border-[3px] border-ink bg-white px-6 py-[22px] text-ink no-underline shadow-[7px_7px_0_#000]"
                 >
                   <IconDot className="size-[54px] sm:size-[54px]">

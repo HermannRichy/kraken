@@ -24,10 +24,11 @@ async function Shell({ children }: { children: ReactNode }) {
     },
     { href: "/espace/cles", label: "Mes clés", icon: "keys", group: "main", locked: !hasKeys(s), badge: hasKeys(s) ? "Prêtes" : undefined },
     { href: "/espace/documentation", label: "Documentation", icon: "docs", group: "main" },
+    { href: "/espace/livraison", label: "Livraison", icon: "submissions", group: "main", locked: s !== "registered" && s !== "delivered" },
     { href: "/espace/notifications", label: "Notifications", icon: "bell", group: "account" },
     { href: "/espace/profil", label: "Mon profil", icon: "user", group: "account" },
   ];
-  const staff = session.user.role === "admin" || session.user.role === "moderator";
+  const staff = ["admin", "organizer", "jury"].includes(session.user.role ?? "");
   return (
     <DashboardShell
       badge="ESPACE"

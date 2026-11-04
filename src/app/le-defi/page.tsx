@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { PageMotion } from "@/components/motion/page-motion";
+import { ChallengeJourney } from "@/components/features/challenge-journey";
 import { CtaBand } from "@/components/features/cta-band";
 import { PageHero } from "@/components/features/page-hero";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
@@ -111,7 +113,13 @@ export default function DefiPage() {
             <Star size={44} className="right-0 -bottom-7" />
           </div>
         }
-      />
+      >
+        <Link href="#deroulement" className="w-fit rounded-xl border-[3px] border-ink bg-kraken px-5 py-3 font-extrabold text-white shadow-[4px_4px_0_#000]">
+          Voir le déroulement étape par étape
+        </Link>
+      </PageHero>
+
+      <ChallengeJourney />
 
       {/* Règles d'or */}
       <section className="border-b-[3px] border-ink">

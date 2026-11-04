@@ -12,7 +12,7 @@ import { pageMetadata } from "@/config/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Prix et certificats",
-  description: "Un certificat vérifiable pour chaque participant qui livre, des prix pour les trois premiers.",
+  description: "Des certificats vérifiables selon les conditions publiées et des prix pour les trois premiers.",
   path: "/prix",
 });
 
@@ -27,7 +27,7 @@ export default function PrixPage() {
             <Highlight doodle={<Burst flip size={36} className="-top-7 -right-10" />}>certifie.</Highlight>
           </>
         }
-        intro="Un certificat pour chaque participant qui livre avant la date limite. Des prix pour les trois premiers, selon le nombre de participants."
+        intro="Des certificats vérifiables selon les conditions publiées par l’organisation. Des prix sont prévus pour les trois premiers, selon le nombre de participants."
         aside={
           <div className="flex items-end justify-center gap-3 px-2.5 pt-10 sm:gap-[18px]">
             <Pop className="flex-1">
@@ -56,8 +56,8 @@ export default function PrixPage() {
       >
         <Pop className="self-start" lift={-6}>
           <div className="rounded-[20px] border-[3px] border-ink bg-ink px-5 py-4 text-white shadow-[6px_6px_0_#0047FF] [transform:perspective(900px)_rotateY(8deg)_rotateZ(-1.5deg)]">
-            <div className="text-xs font-extrabold tracking-[0.08em] text-mist sm:text-[13px]">LOTS DÉFINITIFS ANNONCÉS LE</div>
-            <div className="text-2xl font-extrabold tracking-[-0.02em] sm:text-3xl">9 novembre, à la clôture</div>
+            <div className="text-xs font-extrabold tracking-[0.08em] text-mist sm:text-[13px]">LOTS DÉFINITIFS ANNONCÉS À LA CLÔTURE</div>
+            <div className="text-2xl font-extrabold tracking-[-0.02em] sm:text-3xl">Date proposée : 9 novembre</div>
           </div>
         </Pop>
       </PageHero>
@@ -68,7 +68,7 @@ export default function PrixPage() {
           <div className="flex min-w-0 flex-[1_1_440px] flex-col gap-[26px]">
             <H2>Deux certificats. Vérifiables.</H2>
             {[
-              { icon: "check", tone: "black", t: "Participation", d: "Pour tout participant ayant livré avant la date limite : nom, titre du défi, date, signature HustlerLabs." },
+              { icon: "check", tone: "black", t: "Participation", d: "Prévu pour les participants ayant livré avant la date limite, selon les conditions définitives publiées par l’organisation : nom, titre du défi, date et signature HustlerLabs." },
               { icon: "sparkles", tone: "blue", t: "Mérite", d: "Pour les trois premiers, avec le rang obtenu." },
             ].map((c) => (
               <Pop key={c.t} pop={false} lift={-4} scale={1.01}>
@@ -99,7 +99,7 @@ export default function PrixPage() {
                 <div className="text-sm font-bold text-steel">Décerné à</div>
                 <div className="text-3xl leading-none font-extrabold tracking-[-0.03em] sm:text-[40px]">[Nom du participant]</div>
                 <div className="text-base leading-normal font-semibold">
-                  pour avoir livré une solution au défi <strong>Kraken : Sold Out</strong>, édition 01, le [date].
+                  pour avoir livré une solution au défi <strong>Kraken</strong>, édition 01 — thème « Sold Out », le [date].
                 </div>
                 <div className="flex items-end justify-between gap-4 border-t-[3px] border-dashed border-ink pt-[18px]">
                   <div>

@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/dashboard/ui";
+import { db } from "@/lib/server/db";
+import { requireParticipant } from "@/lib/server/session";
 
 export const metadata: Metadata = { title: "Documentation" };
 
@@ -15,7 +17,10 @@ const RESOURCES = [
   { href: "/faq", label: "FAQ", hint: "Les réponses aux questions fréquentes.", icon: CircleHelp },
 ];
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  await requireParticipant();
+  const now = new Date();
+  const privateResources = await db.resource.findMany({ where: { audience: "participant", status: "published", OR: [{ availableAt: null }, { availableAt: { lte: now } }] }, orderBy: { publishedAt: "desc" } });
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
       <PageHeader title="Documentation" description="Tout ce qu'il faut lire avant d'écrire la première ligne." />
@@ -38,6 +43,7 @@ export default function DocsPage() {
           </li>
         ))}
       </ul>
+      {privateResources.length > 0 && <section className="flex flex-col gap-3"><h2 className="text-xl font-extrabold">Ressources de l'organisation</h2><ul className="grid gap-3 md:grid-cols-2">{privateResources.map((resource) => <li key={resource.id} className="rounded-[18px] border-[3px] border-ink bg-white p-4 shadow-[4px_4px_0_#000]"><p className="font-extrabold">{resource.title}</p>{resource.description && <p className="mt-1 text-sm font-semibold text-steel">{resource.description}</p>}{resource.kind === "file" ? <a href={`/api/ressources/${resource.id}`} className="mt-3 inline-flex rounded-lg border-2 border-ink bg-paper px-3 py-2 text-sm font-extrabold">Télécharger {resource.fileName}</a> : <a href={resource.url ?? "#"} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-lg border-2 border-ink bg-paper px-3 py-2 text-sm font-extrabold">Ouvrir la ressource</a>}</li>)}</ul></section>}
     </div>
   );
 }

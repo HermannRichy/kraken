@@ -40,7 +40,7 @@ export function renderEmail({ subject, preheader, title, blocks }: EmailContent)
 <h1 style="margin:0 0 18px;font-size:28px;line-height:1.1;font-weight:800;letter-spacing:-0.5px;color:#000">${esc(title)}</h1>
 ${body}
 </td></tr>
-<tr><td style="padding:20px 6px 0;font-size:12px;line-height:1.5;color:#626670">Kraken : Sold Out · HustlerLabs<br>Votre back-end. Sous pression.<br><a href="${SITE_URL}" style="color:#0047FF">${SITE_URL.replace(/^https?:\/\//, "")}</a></td></tr>
+<tr><td style="padding:20px 6px 0;font-size:12px;line-height:1.5;color:#626670">Kraken · Édition 01 — Sold Out · HustlerLabs<br>Votre back-end. Sous pression.<br><a href="${SITE_URL}" style="color:#0047FF">${SITE_URL.replace(/^https?:\/\//, "")}</a></td></tr>
 </table></td></tr></table></body></html>`;
 
   const text = [
@@ -52,7 +52,7 @@ ${body}
       return b.text;
     }),
     "",
-    "Kraken : Sold Out · HustlerLabs",
+    "Kraken · Édition 01 — Sold Out · HustlerLabs",
     SITE_URL,
   ].join("\n\n");
 

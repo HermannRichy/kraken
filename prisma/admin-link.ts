@@ -27,7 +27,7 @@ async function main() {
   const email = (args.find((a) => !a.startsWith("--")) ?? process.env.FIRST_ADMIN_EMAIL ?? "kraken@hustlerlabs.tech").trim().toLowerCase();
   const user = await db.user.findUnique({ where: { email } });
   if (!user) throw new Error(`Aucun compte pour ${email}. Lancez d'abord : pnpm db:seed`);
-  if (user.role !== "admin" && user.role !== "moderator") throw new Error(`${email} n'est pas un compte d'équipe (rôle : ${user.role}).`);
+  if (!["admin", "organizer", "jury"].includes(user.role ?? "")) throw new Error(`${email} n'est pas un compte d'équipe (rôle : ${user.role}).`);
 
   if (reset) {
     await db.$transaction([

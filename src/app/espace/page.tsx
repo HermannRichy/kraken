@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Bell, CalendarDays } from "lucide-react";
+import { ArrowRight, BookOpen, Bell, CalendarDays, Upload } from "lucide-react";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 
@@ -97,6 +97,7 @@ function NextStep({ status, email, reason }: { status: string; email: string; re
 const SHORTCUTS = [
   { href: "/espace/documentation", label: "Documentation", hint: "Dossier, contrats OpenAPI, image Docker", icon: BookOpen },
   { href: "/calendrier", label: "Calendrier", hint: "Toutes les dates clés du défi", icon: CalendarDays },
+  { href: "/espace/livraison", label: "Livraison", hint: "Envoyez votre projet au jury", icon: Upload },
   { href: "/espace/notifications", label: "Notifications", hint: "Soyez prévenu en direct", icon: Bell },
 ];
 
@@ -129,7 +130,7 @@ async function Home() {
       </div>
 
       <Panel title="Raccourcis">
-        <ul className="grid gap-3 md:grid-cols-3">
+          <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {SHORTCUTS.map(({ href, label, hint, icon: Icon }) => (
             <li key={href}>
               <Link href={href} className="group flex h-full items-center gap-3.5 rounded-[18px] border-[3px] border-ink bg-paper p-4 transition-transform hover:-translate-y-0.5">

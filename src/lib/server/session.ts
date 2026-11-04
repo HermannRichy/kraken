@@ -7,7 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { adminGate } from "@/lib/admin-path";
 
 import { auth } from "@/lib/auth";
-import { roles, type Role } from "@/lib/permissions";
+import { STAFF_ROLES, roles, type Role } from "@/lib/permissions";
 
 import { db } from "./db";
 
@@ -20,7 +20,7 @@ export const requireParticipant = cache(async () => {
   if (!session) redirect("/connexion");
   const participant = await db.participant.findUnique({ where: { userId: session.user.id } });
   if (!participant) {
-    if (session.user.role === "admin" || session.user.role === "moderator") redirect("/admin");
+    if (STAFF_ROLES.includes(session.user.role as Role)) redirect("/admin");
     redirect("/inscription");
   }
   // Rattrapage : adresse confirmée mais statut pas encore à jour.
@@ -39,7 +39,7 @@ export async function requireStaff(permission?: Permission, { allowWithout2fa = 
   // Sans session ou sans rôle d'équipe : 404, l'administration ne se signale pas.
   if (!session) return adminGate() ? notFound() : redirect("/admin/connexion");
   const role = (session.user.role ?? "participant") as Role;
-  if (role !== "admin" && role !== "moderator") notFound();
+  if (!STAFF_ROLES.includes(role)) notFound();
   if (!allowWithout2fa && !session.user.twoFactorEnabled) redirect("/admin/securite");
   if (permission && !can(role, permission)) redirect("/admin?refus=1");
   return { session, role };

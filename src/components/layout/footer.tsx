@@ -54,7 +54,7 @@ export function Footer() {
           </div>
         </div>
         <div className="flex flex-wrap justify-between gap-3 border-t-2 border-graphite pt-5 text-[13px] font-semibold text-smoke">
-          <span>© 2026 HustlerLabs · Kraken : Sold Out, édition 01</span>
+          <span>© 2026 HustlerLabs · Kraken, édition 01 · Thème : Sold Out</span>
           <span>Votre back-end. Sous pression.</span>
         </div>
       </div>

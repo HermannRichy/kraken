@@ -11,7 +11,7 @@ import { authClient } from "@/lib/auth-client";
 export function InviteStaffForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("moderator");
+  const [role, setRole] = useState("organizer");
   const [pending, startTransition] = useTransition();
   return (
     <form
@@ -31,7 +31,8 @@ export function InviteStaffForm() {
       <TextField label="Nom" value={name} onChange={(e) => setName(e.target.value)} required />
       <TextField label="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       <SelectField label="Rôle" value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="moderator">Modérateur</option>
+        <option value="organizer">Organisateur</option>
+        <option value="jury">Jury</option>
         <option value="admin">Administrateur</option>
       </SelectField>
       <SubmitButton pending={pending} className="min-h-[52px] w-full 2xl:w-auto">
@@ -50,7 +51,7 @@ export function StaffRoleSelect({ userId, role, self }: { userId: string; role: 
       disabled={pending}
       defaultValue={role}
       onChange={(e) => {
-        const value = e.target.value as "admin" | "moderator" | "none";
+        const value = e.target.value as "admin" | "organizer" | "jury" | "none";
         if (value === "none" && !window.confirm("Retirer l'accès à l'administration ?")) {
           e.target.value = role;
           return;
@@ -66,7 +67,8 @@ export function StaffRoleSelect({ userId, role, self }: { userId: string; role: 
       }}
       className="min-h-10 rounded-[12px] border-[3px] border-ink bg-white px-2 text-sm font-bold"
     >
-      <option value="moderator">Modérateur</option>
+      <option value="organizer">Organisateur</option>
+      <option value="jury">Jury</option>
       <option value="admin">Administrateur</option>
       <option value="none">Retirer l&apos;accès</option>
     </select>

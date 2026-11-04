@@ -1,0 +1,6 @@
+"use client";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { setResourceStatusAction, setSubmissionFormStatusAction } from "@/app/admin/actions";
+export function ResourceStatus({ id, status }: { id: string; status: "draft" | "published" | "archived" }) { const [pending, start] = useTransition(); const next = status === "published" ? "archived" : "published"; return <button disabled={pending} onClick={() => start(async () => { const r = await setResourceStatusAction(id, next); r.ok ? toast.success(r.message) : toast.error(r.error); })} className="rounded-lg border-2 border-ink px-3 py-1.5 text-xs font-extrabold disabled:opacity-60">{status === "published" ? "Archiver" : "Publier"}</button>; }
+export function FormStatus({ id, status }: { id: string; status: "draft" | "published" | "closed" | "archived" }) { const [pending, start] = useTransition(); const next = status === "published" ? "closed" : "published"; return <button disabled={pending} onClick={() => start(async () => { const r = await setSubmissionFormStatusAction(id, next); r.ok ? toast.success(r.message) : toast.error(r.error); })} className="rounded-lg border-2 border-ink px-3 py-1.5 text-xs font-extrabold disabled:opacity-60">{status === "published" ? "Fermer" : "Publier"}</button>; }

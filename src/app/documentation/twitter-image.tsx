@@ -1,6 +1,6 @@
 import { OG_CONTENT_TYPE, OG_SIZE, renderOg } from "@/lib/og";
 
-export const alt = "Documentation de Kraken : Sold Out";
+export const alt = "Documentation de Kraken, édition 01 — thème Sold Out";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 

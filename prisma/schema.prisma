@@ -21,7 +21,7 @@ model User {
   image            String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-  // plugin admin : "admin" | "moderator" | "participant"
+  // plugin admin : "admin" | "organizer" | "jury" | "participant"
   role             String?   @default("participant")
   banned           Boolean?  @default(false)
   banReason        String?
@@ -36,6 +36,9 @@ model User {
   pushSubscriptions PushSubscription[]
   notes             Note[]
   auditLogs         AuditLog[]
+  resourcesCreated  Resource[]       @relation("ResourceCreator")
+  formsCreated      SubmissionForm[] @relation("FormCreator")
+  evaluations       SubmissionEvaluation[]
 
   @@map("user")
 }
@@ -165,6 +168,7 @@ model Participant {
   payments  Payment[]
   emailLogs EmailLog[]
   notes     Note[]
+  submissions Submission[]
 
   @@index([status])
   @@index([country])
@@ -222,6 +226,46 @@ enum EmailStatus {
   sent
   failed
   skipped
+}
+
+enum ResourceKind {
+  file
+  link
+  docker_image
+}
+
+enum ResourceAudience {
+  participant
+  public
+}
+
+enum ResourceStatus {
+  draft
+  published
+  archived
+}
+
+enum SubmissionFormStatus {
+  draft
+  published
+  closed
+  archived
+}
+
+enum SubmissionFieldType {
+  short_text
+  long_text
+  url
+  select
+  checkbox
+  file
+}
+
+enum SubmissionStatus {
+  draft
+  submitted
+  under_review
+  evaluated
 }
 
 model EmailLog {
@@ -304,4 +348,118 @@ model AppSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+/// Ressource distribuée par l'organisation : fichier privé, lien ou référence d'image Docker.
+model Resource {
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  kind        ResourceKind
+  audience    ResourceAudience @default(participant)
+  status      ResourceStatus   @default(draft)
+  availableAt DateTime?
+  url         String?
+  storageKey  String?          @unique
+  fileName    String?
+  contentType String?
+  size        Int?
+  createdById String
+  createdBy   User             @relation("ResourceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([status, audience, availableAt])
+  @@index([createdById])
+}
+
+/// Formulaire configurable de livraison finale. Les champs restent versionnés par position et ID stable.
+model SubmissionForm {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  status      SubmissionFormStatus @default(draft)
+  opensAt     DateTime?
+  closesAt    DateTime?
+  createdById String
+  createdBy   User                 @relation("FormCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  fields      SubmissionField[]
+  submissions Submission[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([status, opensAt, closesAt])
+}
+
+model SubmissionField {
+  id          String              @id @default(cuid())
+  formId      String
+  form        SubmissionForm      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  position    Int
+  label       String
+  help        String?
+  type        SubmissionFieldType
+  required    Boolean             @default(false)
+  options     Json?
+  accept      String?
+  maxFiles    Int                 @default(1)
+  createdAt   DateTime            @default(now())
+  attachments SubmissionAttachment[]
+
+  @@unique([formId, position])
+  @@index([formId])
+}
+
+/// Réponse d'un participant, conservée sous forme de brouillon puis figée lors de la livraison.
+model Submission {
+  id            String           @id @default(cuid())
+  formId        String
+  form          SubmissionForm   @relation(fields: [formId], references: [id], onDelete: Restrict)
+  participantId String
+  participant   Participant      @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  status        SubmissionStatus @default(draft)
+  answers       Json             @default("{}")
+  submittedAt   DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  attachments   SubmissionAttachment[]
+  evaluations   SubmissionEvaluation[]
+
+  @@unique([formId, participantId])
+  @@index([status, submittedAt])
+}
+
+model SubmissionAttachment {
+  id           String          @id @default(cuid())
+  submissionId String
+  submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  fieldId      String
+  field        SubmissionField @relation(fields: [fieldId], references: [id], onDelete: Restrict)
+  storageKey   String          @unique
+  fileName     String
+  contentType  String
+  size         Int
+  createdAt    DateTime        @default(now())
+
+  @@index([submissionId, fieldId])
+}
+
+/// Évaluation séparée par membre du jury ; aucune note n'est écrasée.
+model SubmissionEvaluation {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     User       @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+  score        Int?
+  feedback     String?
+  rubric       Json?
+  submittedAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([submissionId, reviewerId])
+  @@index([reviewerId, submittedAt])
 }

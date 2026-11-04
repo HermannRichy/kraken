@@ -1,6 +1,6 @@
 import { OG_CONTENT_TYPE, OG_SIZE, renderOg } from "@/lib/og";
 
-export const alt = "Kraken : Sold Out, votre back-end sous pression";
+export const alt = "Kraken, édition 01 — thème Sold Out. Votre back-end sous pression.";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
