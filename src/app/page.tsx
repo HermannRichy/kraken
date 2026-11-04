@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { connection } from "next/server";
 
 import { PageMotion } from "@/components/motion/page-motion";
 import { CalendarGrid } from "@/components/features/calendar";
 import { Countdown } from "@/components/features/countdown";
 import { FaqList } from "@/components/features/faq-list";
+import { SeatsLeft } from "@/components/features/seats-left";
 import { Marquee } from "@/components/layout/marquee";
 import { AnimatedIcon } from "@/components/motion/animated-icon";
 import { Pop } from "@/components/motion/pop";
@@ -13,7 +13,6 @@ import { Burst, CurlyArrow, Squiggle, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { CHALLENGE } from "@/config/challenge";
 import { FAQ } from "@/content/faq";
-import { getSeatsCap, seatsLeft } from "@/lib/server/participants";
 import { cn } from "@/lib/utils";
 
 const CHALLENGES = [
@@ -82,10 +81,7 @@ const STEPS = [
   { n: "04", t: "Livrez un SHA", d: "Le banc de test rejoue tout sur une VM jetable.", cls: "bg-ink text-white" },
 ];
 
-export default async function Home() {
-  await connection();
-  const [seats, seatCap] = await Promise.all([seatsLeft().catch(() => null), getSeatsCap().catch(() => CHALLENGE.seats)]);
-  const fill = seats === null ? 0 : Math.round(((seatCap - seats) / seatCap) * 100);
+export default function Home() {
 
   return (
     <PageMotion>
@@ -208,13 +204,7 @@ export default async function Home() {
                     <AnimatedIcon name="users" size={20} />
                     PLACES RESTANTES
                   </div>
-                  <div className="text-5xl leading-none font-extrabold tracking-[-0.03em] lg:text-[52px]">
-                    {seats ?? "—"}
-                    <span className="text-2xl">/{seatCap}</span>
-                  </div>
-                  <div className="h-[18px] overflow-hidden rounded-full border-[3px] border-ink bg-white">
-                    <div data-fill className="h-full rounded-full bg-ink" style={{ width: `${fill}%` }} />
-                  </div>
+                  <SeatsLeft />
                   <div className="text-[13px] font-semibold">Au-delà : liste d&apos;attente</div>
                   <Star size={34} className="-top-6 -right-5" />
                 </div>
