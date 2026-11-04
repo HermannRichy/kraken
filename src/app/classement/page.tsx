@@ -10,7 +10,7 @@ import { pageMetadata } from "@/config/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Classement",
-  description: "Le classement public de Kraken : Sold Out, publié après l'évaluation.",
+  description: "Le classement public de Kraken, édition 01 — thème Sold Out, publié après l'évaluation.",
   path: "/classement",
 });
 

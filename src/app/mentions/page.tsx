@@ -29,17 +29,17 @@ const SECTIONS: LegalSection[] = [
     blocks: [
       { h: "Ce que nous collectons", p: "Uniquement les données du formulaire d'inscription. Aucune donnée de carte n'est stockée : seul le prestataire de paiement les voit." },
       { h: "Consentements", p: "Chaque consentement est enregistré avec sa date et la version du texte accepté : règles, conditions, traitement des données, nom public dans le classement." },
-      { h: "Conservation", p: "Durée de conservation : [À FIXER]. Les certificats restent vérifiables." },
-      { h: "Vos droits", p: "Suppression ou anonymisation sur demande, sauf ce que la loi impose de garder, comme les reçus. Contact : [contact@domaine]." },
+      { h: "Conservation", p: "Les demandes de contact sont conservées au maximum 24 mois. Les données d'inscription et de paiement sont conservées pendant la durée nécessaire à l'organisation du défi, puis selon les obligations légales applicables. Les certificats restent vérifiables." },
+      { h: "Vos droits", p: "Vous pouvez demander l'accès, la rectification ou la suppression de vos données, sous réserve des données que la loi impose de conserver, notamment les reçus. Contact : kraken@hustlerlabs.tech." },
       { h: "Cadre légal", p: "Loi béninoise sur la protection des données personnelles et, pour les participants européens, le RGPD." },
     ],
   },
   {
     label: "Mentions légales",
     blocks: [
-      { h: "Éditeur", p: "HustlerLabs · [forme juridique, adresse, immatriculation]." },
-      { h: "Responsable de la publication", p: "[Nom du responsable]." },
-      { h: "Hébergement", p: "Hébergé par HustlerLabs · [hébergeur, adresse]." },
+      { h: "Éditeur", p: "HustlerLabs — studio de développement logiciel, établissement individuel exploité par Igor Adande. Siège : Zounga, Godomey, Abomey-Calavi, Bénin. RCCM : RB/ABC/25 A 134256 (Tribunal de commerce de Cotonou, 19/12/2025). IFU : 0202290294802." },
+      { h: "Responsable de la publication", p: "Igor Adande." },
+      { h: "Hébergement", p: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis." },
       { h: "Propriété intellectuelle", p: "La marque Kraken, son logo et ses éléments graphiques appartiennent à HustlerLabs." },
     ],
   },
@@ -56,7 +56,7 @@ export default function MentionsPage() {
             <Highlight doodle={<Burst flip size={40} className="-top-8 -right-11" />}>noir sur blanc.</Highlight>
           </h1>
           <p data-reveal className="text-[15px] font-bold text-steel">
-            Version [X.X] · mise à jour le [date]
+            Version 1.0 · mise à jour le 2 novembre 2026
           </p>
         </Container>
       </section>

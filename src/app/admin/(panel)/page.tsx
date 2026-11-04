@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
 import { PageHeader, Panel, Stat, STATUS_LABELS } from "@/components/dashboard/ui";
 import { countryName } from "@/config/countries";
@@ -8,7 +9,8 @@ import { countTakenSeats, getSeatsCap } from "@/lib/server/participants";
 import { requireStaff } from "@/lib/server/session";
 
 async function Dashboard() {
-  await requireStaff({ participant: ["read"] });
+  const { role } = await requireStaff();
+  if (role === "jury") redirect("/admin/soumissions");
   // eslint-disable-next-line react-hooks/purity -- composant serveur rendu à chaque requête
   const since = new Date(Date.now() - 13 * 86400_000);
   since.setHours(0, 0, 0, 0);

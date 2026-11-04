@@ -1,24 +1,23 @@
 /**
  * Source de configuration unique du défi.
  * Toutes les dates sont en UTC (ISO 8601) et s'affichent en heure du Bénin (UTC+1).
- * Le calendrier est encore « proposé » : à confirmer avant publication.
+ * Toutes les échéances sont publiées et doivent rester cohérentes entre les pages.
  */
 
 export const CHALLENGE = {
-  name: "Kraken : Sold Out",
+  name: "Kraken",
+  theme: "Sold Out",
   edition: "Édition 01",
   organizer: "HustlerLabs",
   tagline: "Votre back-end. Sous pression.",
   fee: "2 000 FCFA",
   seats: 100,
-  /** Places restantes en temps réel. `null` tant que l'API n'est pas branchée. */
-  seatsLeft: null as number | null,
   devDays: 21,
   budget: { cpu: "2 vCPU", ram: "4 Go" },
   refundDays: 7,
   minParticipants: 10,
-  whatsappUrl: "#whatsapp",
-  contactEmail: "[contact@domaine]",
+  whatsappUrl: "https://chat.whatsapp.com/CozY4La8aWh8J3O96KyN0M",
+  contactEmail: "kraken@hustlerlabs.tech",
   timezone: "Africa/Porto-Novo",
 } as const;
 
@@ -36,10 +35,10 @@ export const STEPS: Step[] = [
   {
     id: "open",
     title: "Ouverture des inscriptions",
-    shortDate: "[DATE]",
-    when: "Début novembre",
+    shortDate: "2 nov.",
+    when: "Lundi 2 novembre",
     desc: "100 places, 2 000 FCFA par Mobile Money.",
-    at: null,
+    at: "2026-11-01T23:00:00Z",
   },
   {
     id: "close",

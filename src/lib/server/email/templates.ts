@@ -9,11 +9,11 @@ const firstName = (full: string) => full.trim().split(/\s+/)[0] || full;
 export const templates = {
   verifyEmail: (p: { name: string; url: string }) =>
     renderEmail({
-      subject: "Confirmez votre adresse · Kraken : Sold Out",
+      subject: "Confirmez votre adresse · Kraken — édition 01 : Sold Out",
       preheader: "Un clic pour confirmer votre inscription au défi.",
       title: `Bienvenue, ${firstName(p.name)} !`,
       blocks: [
-        { kind: "p", text: "Votre inscription à Kraken : Sold Out est enregistrée. Confirmez votre adresse e-mail pour accéder à votre espace et régler les frais de participation." },
+        { kind: "p", text: "Votre inscription à Kraken, édition 01 — thème Sold Out, est enregistrée. Confirmez votre adresse e-mail pour accéder à votre espace et régler les frais de participation." },
         { kind: "button", label: "Confirmer mon adresse", url: p.url },
         { kind: "small", text: "Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message." },
       ],
@@ -33,7 +33,7 @@ export const templates = {
 
   paymentReceipt: (p: { name: string; amount: number; network: string; reference: string; date: string; url: string }) =>
     renderEmail({
-      subject: "Reçu et bienvenue · Kraken : Sold Out",
+      subject: "Reçu et bienvenue · Kraken — édition 01 : Sold Out",
       preheader: "Paiement confirmé : votre place est réservée.",
       title: "Votre place est réservée.",
       blocks: [
@@ -55,7 +55,7 @@ export const templates = {
 
   paymentFailed: (p: { name: string; reason: string; url: string }) =>
     renderEmail({
-      subject: "Paiement non abouti · Kraken : Sold Out",
+      subject: "Paiement non abouti · Kraken — édition 01 : Sold Out",
       preheader: "Votre paiement n'a pas été confirmé.",
       title: "Le paiement n'a pas abouti.",
       blocks: [
@@ -66,7 +66,7 @@ export const templates = {
 
   waitlisted: (p: { name: string; url: string }) =>
     renderEmail({
-      subject: "Liste d'attente · Kraken : Sold Out",
+      subject: "Liste d'attente · Kraken — édition 01 : Sold Out",
       preheader: "Les 100 places sont prises : vous êtes en liste d'attente.",
       title: "Vous êtes en liste d'attente.",
       blocks: [
@@ -81,7 +81,7 @@ export const templates = {
       preheader: "Définissez votre mot de passe.",
       title: `Bienvenue dans l'équipe, ${firstName(p.name)}.`,
       blocks: [
-        { kind: "p", text: `Un accès « ${p.role} » vous a été ouvert sur l'espace d'administration de Kraken : Sold Out. Définissez votre mot de passe, puis activez la double authentification à la première connexion.` },
+        { kind: "p", text: `Un accès « ${p.role} » vous a été ouvert sur l'espace d'administration de Kraken, édition 01 — thème Sold Out. Définissez votre mot de passe, puis activez la double authentification à la première connexion.` },
         { kind: "button", label: "Définir mon mot de passe", url: p.url },
         { kind: "small", text: "Ce lien est valable 1 heure." },
       ],

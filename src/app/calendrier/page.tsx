@@ -28,7 +28,7 @@ export default function CalendrierPage() {
             <span data-split> de plus.</span>
           </>
         }
-        intro="Toutes les heures sont en heure du Bénin (UTC+1). À la date limite, la livraison se verrouille à la seconde près, sur l'horloge du serveur."
+        intro="Toutes les heures sont en heure du Bénin (UTC+1). Les dates affichées sont le calendrier proposé et restent à confirmer par l’organisation ; une fois la date limite validée, la livraison se verrouillera à la seconde près, sur l’horloge du serveur."
         aside={
           <div className="relative px-2.5 py-6">
             <Pop lift={-10}>
@@ -48,9 +48,7 @@ export default function CalendrierPage() {
       <section className="border-b-[3px] border-ink">
         <div className="mx-auto flex max-w-[960px] flex-col gap-7 px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
           <CalendarTimeline />
-          <p data-reveal className="text-sm font-semibold text-steel sm:ml-20">
-            Le jour exact d&apos;ouverture des inscriptions reste à annoncer.
-          </p>
+          <p data-reveal className="text-sm font-semibold text-steel sm:ml-20">Calendrier proposé : le jour d’ouverture des inscriptions et la validation des échéances restent à confirmer par l’organisation.</p>
         </div>
       </section>
     </PageMotion>

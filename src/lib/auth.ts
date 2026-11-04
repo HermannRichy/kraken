@@ -21,13 +21,13 @@ const turnstileSecret = process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUB
 const BOT_GUARDED = ["/sign-in/email", "/sign-in/magic-link", "/request-password-reset"];
 
 export const auth = betterAuth({
-  appName: "Kraken : Sold Out",
+  appName: "Kraken — édition 01 : Sold Out",
   baseURL: process.env.BETTER_AUTH_URL ?? SITE_URL,
   secret: process.env.BETTER_AUTH_SECRET,
   database: prismaAdapter(db, { provider: "postgresql" }),
   trustedOrigins: [...allowedOrigins()],
 
-  // Équipe (admin, modérateurs) : e-mail + mot de passe + double authentification.
+  // Équipe (administrateurs, organisateurs, jury) : e-mail + mot de passe + double authentification.
   // Aucune inscription publique par mot de passe : les comptes d'équipe sont créés par un admin.
   emailAndPassword: {
     enabled: true,
@@ -41,8 +41,8 @@ export const auth = betterAuth({
       const hasPassword = await db.account.findFirst({ where: { userId: user.id, providerId: "credential" }, select: { id: true } });
       const role = (user as { role?: string }).role;
       const content =
-        !hasPassword && (role === "admin" || role === "moderator")
-          ? templates.staffInvite({ name: user.name, role: role === "admin" ? "Administrateur" : "Modérateur", url })
+        !hasPassword && (role === "admin" || role === "organizer" || role === "jury")
+          ? templates.staffInvite({ name: user.name, role: role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Jury", url })
           : templates.passwordReset({ url });
       await sendEmail({ to: { email: user.email, name: user.name }, type: hasPassword ? "password_reset" : "staff_invite", content });
     },

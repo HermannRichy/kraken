@@ -7,10 +7,10 @@ import { requireStaff } from "@/lib/server/session";
 
 async function Team() {
   const { session } = await requireStaff({ user: ["set-role"] });
-  const staff = await db.user.findMany({ where: { role: { in: ["admin", "moderator"] } }, orderBy: { createdAt: "asc" } });
+  const staff = await db.user.findMany({ where: { role: { in: ["admin", "organizer", "jury"] } }, orderBy: { createdAt: "asc" } });
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Équipe" description="Administrateurs et modérateurs." />
+      <PageHeader title="Équipe" description="Administrateurs, organisateurs et jury." />
       <Panel title="Inviter un membre">
         <InviteStaffForm />
         <p className="text-sm text-steel">Le membre reçoit un lien pour définir son mot de passe, puis active la double authentification à la première connexion.</p>
@@ -25,7 +25,7 @@ async function Team() {
                   <span className="break-all">{u.email}</span> · depuis {fmtDate(u.createdAt)} · 2FA {u.twoFactorEnabled ? "active" : "à activer"}
                 </div>
               </div>
-              <StaffRoleSelect userId={u.id} role={u.role ?? "moderator"} self={u.id === session.user.id} />
+              <StaffRoleSelect userId={u.id} role={u.role ?? "organizer"} self={u.id === session.user.id} />
             </li>
           ))}
         </ul>

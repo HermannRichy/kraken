@@ -10,6 +10,7 @@ import { adminResetPath } from "@/lib/admin-path";
 import { auth } from "@/lib/auth";
 import { audit } from "@/lib/server/audit";
 import { db } from "@/lib/server/db";
+import { isCloudinaryConfigured, uploadPrivateFile } from "@/lib/server/cloudinary";
 import { encryptedKeys } from "@/lib/server/participants";
 import { rateLimit, retryMessage } from "@/lib/server/rate-limit";
 import { requireStaff } from "@/lib/server/session";
@@ -18,13 +19,39 @@ import { emailField } from "@/lib/validation";
 type Result = { ok: true; message?: string } | { ok: false; error: string };
 
 const id = z.string().min(1).max(64);
+const resourceSchema = z.object({
+  title: z.string().trim().min(3).max(140),
+  description: z.string().trim().max(2000).optional(),
+  kind: z.enum(["file", "link", "docker_image"]),
+  audience: z.enum(["participant", "public"]),
+  availableAt: z.string().optional(),
+  url: z.string().url().max(2000).optional(),
+});
+
+const submissionFieldSchema = z.object({
+  label: z.string().trim().min(2).max(140),
+  help: z.string().trim().max(500).optional(),
+  type: z.enum(["short_text", "long_text", "url", "select", "checkbox", "file"]),
+  required: z.boolean().default(false),
+  options: z.array(z.string().trim().min(1).max(100)).max(30).optional(),
+  accept: z.string().trim().max(250).optional(),
+  maxFiles: z.number().int().min(1).max(5).default(1),
+});
+
+const submissionFormSchema = z.object({
+  title: z.string().trim().min(3).max(140),
+  description: z.string().trim().max(2000).optional(),
+  opensAt: z.string().optional(),
+  closesAt: z.string().optional(),
+  fields: z.array(submissionFieldSchema).min(1).max(30),
+});
 
 async function guardRate(userId: string, action: string, limit = 30, windowSec = 60): Promise<Result | null> {
   const r = await rateLimit(`admin:${action}:${userId}`, limit, windowSec);
   return r.ok ? null : { ok: false, error: retryMessage(r.retryAfter) };
 }
 
-/** Note interne sur un participant (admin et modérateurs). */
+/** Note interne sur un participant (administration et organisation). */
 export async function addNoteAction(participantId: string, body: string): Promise<Result> {
   const { session } = await requireStaff({ participant: ["note"] });
   const limited = await guardRate(session.user.id, "note");
@@ -36,7 +63,7 @@ export async function addNoteAction(participantId: string, body: string): Promis
   return { ok: true };
 }
 
-/** Renvoie le lien de confirmation ou de connexion (admin et modérateurs). */
+/** Renvoie le lien de confirmation ou de connexion (administration et organisation). */
 export async function resendEmailAction(participantId: string, kind: "verify" | "login"): Promise<Result> {
   const { session } = await requireStaff({ participant: ["resend"] });
   const limited = await guardRate(session.user.id, "resend", 10, 60);
@@ -101,7 +128,96 @@ export async function setSeatsCapAction(value: number): Promise<Result> {
   return { ok: true, message: "Plafond mis à jour." };
 }
 
-const roleSchema = z.enum(["admin", "moderator"]);
+/** Ajoute une ressource au catalogue sécurisé. Les fichiers restent privés dans Cloudinary. */
+export async function createResourceAction(formData: FormData): Promise<Result> {
+  const { session } = await requireStaff({ resource: ["create"] });
+  const parsed = resourceSchema.safeParse({
+    title: formData.get("title"), description: formData.get("description") || undefined, kind: formData.get("kind"), audience: formData.get("audience"),
+    availableAt: formData.get("availableAt") || undefined, url: formData.get("url") || undefined,
+  });
+  if (!parsed.success) return { ok: false, error: "Vérifiez le titre, le type et le lien de la ressource." };
+  const data = parsed.data;
+  const availableAt = data.availableAt ? new Date(data.availableAt) : null;
+  if (availableAt && Number.isNaN(availableAt.getTime())) return { ok: false, error: "Date d'ouverture invalide." };
+  if (data.kind !== "file" && !data.url) return { ok: false, error: "Un lien ou une référence d'image Docker est requis." };
+
+  let storageKey: string | undefined;
+  let fileName: string | undefined;
+  let contentType: string | undefined;
+  let size: number | undefined;
+  if (data.kind === "file") {
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size < 1) return { ok: false, error: "Choisissez un fichier." };
+    if (file.size > 4_000_000) return { ok: false, error: "Le fichier dépasse 4 Mo. Utilisez une image Docker publiée dans un registre pour les artefacts volumineux." };
+    if (!isCloudinaryConfigured()) return { ok: false, error: "Cloudinary n'est pas encore configuré." };
+    storageKey = await uploadPrivateFile(file, "kraken/resources");
+    fileName = file.name.slice(0, 255);
+    contentType = file.type || "application/octet-stream";
+    size = file.size;
+  }
+  const resource = await db.resource.create({ data: { title: data.title, description: data.description, kind: data.kind, audience: data.audience, availableAt, url: data.kind === "file" ? null : data.url, storageKey, fileName, contentType, size, createdById: session.user.id } });
+  await audit({ actorId: session.user.id, action: "resource.create", targetType: "resource", targetId: resource.id, meta: { kind: data.kind, audience: data.audience } });
+  revalidatePath("/admin/ressources");
+  return { ok: true, message: "Ressource enregistrée en brouillon." };
+}
+
+export async function setResourceStatusAction(resourceId: string, status: "published" | "archived" | "draft"): Promise<Result> {
+  const { session } = await requireStaff({ resource: ["publish"] });
+  if (!id.safeParse(resourceId).success) return { ok: false, error: "Ressource invalide." };
+  const resource = await db.resource.update({ where: { id: resourceId }, data: { status, publishedAt: status === "published" ? new Date() : undefined, archivedAt: status === "archived" ? new Date() : undefined } });
+  await audit({ actorId: session.user.id, action: `resource.${status}`, targetType: "resource", targetId: resource.id });
+  revalidatePath("/admin/ressources");
+  revalidatePath("/espace/documentation");
+  return { ok: true, message: "Statut mis à jour." };
+}
+
+/** Crée un formulaire versionné de livraison, composé par l'organisation. */
+export async function createSubmissionFormAction(input: unknown): Promise<Result> {
+  const { session } = await requireStaff({ submissionForm: ["create"] });
+  const parsed = submissionFormSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Vérifiez le titre et les champs du formulaire." };
+  const { opensAt, closesAt, fields, ...data } = parsed.data;
+  const open = opensAt ? new Date(opensAt) : null;
+  const close = closesAt ? new Date(closesAt) : null;
+  if ((open && Number.isNaN(open.getTime())) || (close && Number.isNaN(close.getTime())) || (open && close && close <= open)) return { ok: false, error: "Les dates d'ouverture et de fermeture sont invalides." };
+  const form = await db.submissionForm.create({
+    data: {
+      ...data, opensAt: open, closesAt: close, createdById: session.user.id,
+      fields: { create: fields.map((field, position) => ({ ...field, position, options: field.type === "select" ? field.options ?? [] : undefined, accept: field.type === "file" ? field.accept || undefined : undefined, maxFiles: field.type === "file" ? field.maxFiles : 1 })) },
+    },
+  });
+  await audit({ actorId: session.user.id, action: "submissionForm.create", targetType: "submissionForm", targetId: form.id });
+  revalidatePath("/admin/formulaires");
+  return { ok: true, message: "Formulaire créé en brouillon." };
+}
+
+export async function setSubmissionFormStatusAction(formId: string, status: "draft" | "published" | "closed" | "archived"): Promise<Result> {
+  const { session } = await requireStaff({ submissionForm: ["publish"] });
+  if (!id.safeParse(formId).success) return { ok: false, error: "Formulaire invalide." };
+  await db.submissionForm.update({ where: { id: formId }, data: { status } });
+  await audit({ actorId: session.user.id, action: `submissionForm.${status}`, targetType: "submissionForm", targetId: formId });
+  revalidatePath("/admin/formulaires");
+  revalidatePath("/espace/livraison");
+  return { ok: true, message: "Statut du formulaire mis à jour." };
+}
+
+/** Enregistre l'évaluation personnelle d'un membre du jury, sans écraser celles des autres. */
+export async function saveEvaluationAction(input: unknown): Promise<Result> {
+  const { session } = await requireStaff({ submission: ["evaluate"] });
+  const parsed = z.object({ submissionId: id, score: z.number().int().min(0).max(100).nullable(), feedback: z.string().trim().max(5000).optional() }).safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Évaluation invalide." };
+  const submission = await db.submission.findUnique({ where: { id: parsed.data.submissionId }, select: { id: true } });
+  if (!submission) return { ok: false, error: "Livraison introuvable." };
+  await db.$transaction([
+    db.submissionEvaluation.upsert({ where: { submissionId_reviewerId: { submissionId: submission.id, reviewerId: session.user.id } }, create: { submissionId: submission.id, reviewerId: session.user.id, score: parsed.data.score, feedback: parsed.data.feedback, submittedAt: new Date() }, update: { score: parsed.data.score, feedback: parsed.data.feedback, submittedAt: new Date() } }),
+    db.submission.update({ where: { id: submission.id }, data: { status: "evaluated" } }),
+  ]);
+  await audit({ actorId: session.user.id, action: "submission.evaluate", targetType: "submission", targetId: submission.id });
+  revalidatePath("/admin/soumissions");
+  return { ok: true, message: "Évaluation enregistrée." };
+}
+
+const roleSchema = z.enum(["admin", "organizer", "jury"]);
 
 /** Invite un membre de l'équipe : compte créé, lien pour définir le mot de passe (admin). */
 export async function inviteStaffAction(input: { name: string; email: string; role: string }): Promise<Result> {
@@ -125,11 +241,11 @@ export async function inviteStaffAction(input: { name: string; email: string; ro
 }
 
 /** Change le rôle d'un membre de l'équipe ou lui retire l'accès (admin). */
-export async function setStaffRoleAction(userId: string, role: "admin" | "moderator" | "none"): Promise<Result> {
+export async function setStaffRoleAction(userId: string, role: "admin" | "organizer" | "jury" | "none"): Promise<Result> {
   const { session } = await requireStaff({ user: ["set-role"] });
   if (userId === session.user.id) return { ok: false, error: "Vous ne pouvez pas modifier votre propre rôle." };
   const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
-  if (!target || (target.role !== "admin" && target.role !== "moderator")) return { ok: false, error: "Membre introuvable." };
+  if (!target || !["admin", "organizer", "jury"].includes(target.role ?? "")) return { ok: false, error: "Membre introuvable." };
   if (target.role === "admin" && role !== "admin") {
     const admins = await db.user.count({ where: { role: "admin" } });
     if (admins <= 1) return { ok: false, error: "Il doit rester au moins un administrateur." };

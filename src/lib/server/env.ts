@@ -27,6 +27,11 @@ const schema = z.object({
   NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().default("mailto:kraken@hustlerlabs.tech"),
+  // Documents privés (Cloudinary)
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_URL: z.string().url().optional(),
   // Divers
   GITHUB_TOKEN: z.string().optional(),
   CRON_SECRET: z.string().optional(),

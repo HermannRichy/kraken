@@ -9,11 +9,11 @@ import { Burst, Star } from "@/components/ui/doodles";
 import { Chip, Container, Highlight, Sticker } from "@/components/ui/primitives";
 import { CHALLENGE } from "@/config/challenge";
 import { pageMetadata } from "@/config/site";
-import { seatsLeft } from "@/lib/server/participants";
+import { getSeatsCap, seatsLeft } from "@/lib/server/participants";
 
 export const metadata: Metadata = pageMetadata({
   title: "Inscription",
-  description: "Inscrivez-vous à Kraken : Sold Out. 100 places, 2 000 FCFA par Mobile Money, solo, langage libre.",
+  description: "Inscrivez-vous à Kraken, édition 01 — thème Sold Out. 100 places, 2 000 FCFA par Mobile Money, solo, langage libre.",
   path: "/inscription",
 });
 
@@ -25,14 +25,14 @@ const NEXT_STEPS = [
 
 async function Seats() {
   await connection();
-  const left = await seatsLeft().catch(() => null);
+  const [left, cap] = await Promise.all([seatsLeft().catch(() => null), getSeatsCap().catch(() => CHALLENGE.seats)]);
   if (left === null) return null;
   return (
     <div className="flex items-baseline justify-between gap-3 rounded-2xl border-[3px] border-ink bg-white px-4 py-3 text-ink">
       <span className="text-sm font-extrabold tracking-[0.06em]">PLACES RESTANTES</span>
       <span className="text-3xl font-extrabold tracking-[-0.03em]">
         {left}
-        <span className="text-base">/{CHALLENGE.seats}</span>
+        <span className="text-base">/{cap}</span>
       </span>
     </div>
   );

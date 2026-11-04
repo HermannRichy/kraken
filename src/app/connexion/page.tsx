@@ -8,7 +8,7 @@ import { Chip, Container, Highlight } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
   title: "Connexion",
-  description: "Connexion à votre espace participant Kraken : Sold Out.",
+  description: "Connexion à votre espace participant Kraken, édition 01 — thème Sold Out.",
   robots: { index: false },
 };
 

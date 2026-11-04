@@ -84,7 +84,7 @@ export async function startPayment(input: {
       network: network.slug,
       phone: phoneDigits,
       amount: REGISTRATION_FEE,
-      description: "Inscription Kraken : Sold Out",
+      description: "Inscription Kraken — édition 01 : Sold Out",
       callbackInfo: reserved.id,
     });
     await db.payment.update({ where: { id: reserved.id }, data: { providerRef: res.reference, lastCheckedAt: new Date() } });

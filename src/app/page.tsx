@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { connection } from "next/server";
 
 import { PageMotion } from "@/components/motion/page-motion";
 import { CalendarGrid } from "@/components/features/calendar";
@@ -12,6 +13,7 @@ import { Burst, CurlyArrow, Squiggle, Star } from "@/components/ui/doodles";
 import { Chip, Container, H2, Highlight, IconDot, Sticker } from "@/components/ui/primitives";
 import { CHALLENGE } from "@/config/challenge";
 import { FAQ } from "@/content/faq";
+import { getSeatsCap, seatsLeft } from "@/lib/server/participants";
 import { cn } from "@/lib/utils";
 
 const CHALLENGES = [
@@ -80,9 +82,10 @@ const STEPS = [
   { n: "04", t: "Livrez un SHA", d: "Le banc de test rejoue tout sur une VM jetable.", cls: "bg-ink text-white" },
 ];
 
-export default function Home() {
-  const seats = CHALLENGE.seatsLeft;
-  const fill = seats === null ? 62 : Math.round(((CHALLENGE.seats - seats) / CHALLENGE.seats) * 100);
+export default async function Home() {
+  await connection();
+  const [seats, seatCap] = await Promise.all([seatsLeft().catch(() => null), getSeatsCap().catch(() => CHALLENGE.seats)]);
+  const fill = seats === null ? 0 : Math.round(((seatCap - seats) / seatCap) * 100);
 
   return (
     <PageMotion>
@@ -93,7 +96,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-2.5" data-reveal>
               <span className="inline-flex -rotate-2 items-center gap-2 rounded-full border-[3px] border-ink bg-white px-3.5 py-1.5 text-xs font-extrabold shadow-[4px_4px_0_#000] sm:text-sm">
                 <span className="size-2.5 rounded-full border-2 border-ink bg-kraken" />
-                {CHALLENGE.edition} · Sold Out
+                {CHALLENGE.edition} · {CHALLENGE.theme}
               </span>
               <span className="inline-flex rotate-[1.5deg] rounded-full border-[3px] border-ink bg-ink px-3.5 py-1.5 text-xs font-extrabold text-white sm:text-sm">
                 Défi back-end · Solo
@@ -132,7 +135,7 @@ export default function Home() {
                 <Star size={30} className="-top-4 -right-4" />
               </div>
               <Button href="/le-defi" variant="white" size="lg" icon="arrow-up-right" full className="sm:w-auto">
-                Lire le défi
+                Voir le déroulement
               </Button>
             </div>
             <p data-reveal className="text-center text-[13px] font-semibold text-steel sm:text-left sm:text-sm">
@@ -206,8 +209,8 @@ export default function Home() {
                     PLACES RESTANTES
                   </div>
                   <div className="text-5xl leading-none font-extrabold tracking-[-0.03em] lg:text-[52px]">
-                    {seats ?? "[XX]"}
-                    <span className="text-2xl">/{CHALLENGE.seats}</span>
+                    {seats ?? "—"}
+                    <span className="text-2xl">/{seatCap}</span>
                   </div>
                   <div className="h-[18px] overflow-hidden rounded-full border-[3px] border-ink bg-white">
                     <div data-fill className="h-full rounded-full bg-ink" style={{ width: `${fill}%` }} />
@@ -297,6 +300,11 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div data-reveal className="self-start">
+            <Button href="/le-defi#deroulement" variant="white" icon="arrow-right">
+              Le déroulement complet
+            </Button>
+          </div>
         </Container>
       </section>
 
@@ -365,7 +373,7 @@ export default function Home() {
             </div>
             <span data-reveal className="inline-flex items-center gap-2 text-sm font-bold text-steel">
               <AnimatedIcon name="calendar-days" size={18} />
-              Heure du Bénin (UTC+1)
+              Calendrier proposé · Heure du Bénin (UTC+1)
             </span>
           </div>
           <CalendarGrid />
@@ -379,8 +387,8 @@ export default function Home() {
             <Chip doodle="burst">04 · Prix et certificats</Chip>
             <H2 className="lg:text-[64px]">Livrez. On vous le certifie.</H2>
             <p data-reveal className="text-base leading-relaxed font-semibold text-steel lg:text-lg">
-              Un certificat vérifiable par QR code pour chaque participant qui livre avant la date limite. Des prix pour les trois premiers,
-              selon le nombre de participants : les lots définitifs sont annoncés à la clôture des inscriptions, le 9 novembre.
+              Des certificats vérifiables sont prévus selon les conditions publiées par l&apos;organisation. Des prix sont prévus pour les trois premiers,
+              selon le nombre de participants ; les lots définitifs seront annoncés à la clôture des inscriptions, dont la date reste à confirmer.
             </p>
           </div>
           <Podium />

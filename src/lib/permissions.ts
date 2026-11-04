@@ -4,7 +4,8 @@ import { adminAc, defaultStatements } from "better-auth/plugins/admin/access";
 /**
  * Contrôle d'accès partagé (serveur + client).
  * - admin       : tout, y compris rôles, remboursements, disqualifications, clés, réglages, export
- * - moderator   : lecture des participants, notes internes, renvoi d'e-mails
+ * - organizer   : gestion opérationnelle, ressources et formulaires de livraison
+ * - jury        : lecture des livraisons et évaluation, sans données de paiement ni réglages
  * - participant : son propre espace uniquement
  */
 export const statements = {
@@ -12,6 +13,9 @@ export const statements = {
   participant: ["read", "note", "resend", "update", "disqualify", "export"],
   keys: ["revoke"],
   settings: ["update"],
+  resource: ["read", "create", "update", "delete", "publish"],
+  submissionForm: ["read", "create", "update", "delete", "publish"],
+  submission: ["read", "update", "evaluate", "export"],
 } as const;
 
 export const ac = createAccessControl(statements);
@@ -22,9 +26,18 @@ export const roles = {
     participant: ["read", "note", "resend", "update", "disqualify", "export"],
     keys: ["revoke"],
     settings: ["update"],
+    resource: ["read", "create", "update", "delete", "publish"],
+    submissionForm: ["read", "create", "update", "delete", "publish"],
+    submission: ["read", "update", "evaluate", "export"],
   }),
-  moderator: ac.newRole({
+  organizer: ac.newRole({
     participant: ["read", "note", "resend"],
+    resource: ["read", "create", "update", "delete", "publish"],
+    submissionForm: ["read", "create", "update", "delete", "publish"],
+    submission: ["read", "update", "export"],
+  }),
+  jury: ac.newRole({
+    submission: ["read", "evaluate", "export"],
   }),
   participant: ac.newRole({
     participant: [],
@@ -32,10 +45,11 @@ export const roles = {
 };
 
 export type Role = keyof typeof roles;
-export const STAFF_ROLES: Role[] = ["admin", "moderator"];
+export const STAFF_ROLES: Role[] = ["admin", "organizer", "jury"];
 
 export const ROLE_LABELS: Record<Role, string> = {
   admin: "Administrateur",
-  moderator: "Modérateur",
+  organizer: "Organisateur",
+  jury: "Jury",
   participant: "Participant",
 };

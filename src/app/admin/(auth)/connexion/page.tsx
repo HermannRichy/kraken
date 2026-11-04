@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Connexion", robots: { index: false, 
 async function Login({ searchParams }: { searchParams: PageProps<"/admin/connexion">["searchParams"] }) {
   const [sp, session] = await Promise.all([searchParams, getSession()]);
   // Déjà connecté (avec 2FA) : directement au tableau de bord.
-  if (session && (session.user.role === "admin" || session.user.role === "moderator")) redirect("/admin");
+  if (session && ["admin", "organizer", "jury"].includes(session.user.role ?? "")) redirect("/admin");
   return <StaffLogin startAt2fa={sp.etape === "2fa"} resetPath={adminResetPath()} />;
 }
 

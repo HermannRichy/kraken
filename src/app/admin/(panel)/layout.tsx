@@ -11,8 +11,16 @@ export const metadata: Metadata = { title: { default: "Administration", template
 async function Shell({ children }: { children: ReactNode }) {
   const { session, role } = await requireStaff(undefined, { allowWithout2fa: true });
   const items: NavItem[] = [
-    { href: "/admin", label: "Tableau de bord", icon: "dashboard", group: "main" },
-    { href: "/admin/participants", label: "Participants", icon: "participants", group: "main" },
+    ...(role === "admin" || role === "organizer"
+      ? ([{ href: "/admin", label: "Tableau de bord", icon: "dashboard", group: "main" }, { href: "/admin/participants", label: "Participants", icon: "participants", group: "main" }] satisfies NavItem[])
+      : []),
+    ...(role === "admin" || role === "organizer"
+      ? ([
+          { href: "/admin/ressources", label: "Ressources", icon: "resources", group: "challenge" },
+          { href: "/admin/formulaires", label: "Formulaires", icon: "docs", group: "challenge" },
+        ] satisfies NavItem[])
+      : []),
+    { href: "/admin/soumissions", label: "Soumissions", icon: "submissions", group: "challenge" },
     ...(role === "admin"
       ? ([
           { href: "/admin/equipe", label: "Équipe", icon: "team", group: "main" },
@@ -28,6 +36,7 @@ async function Shell({ children }: { children: ReactNode }) {
       items={items}
       groups={[
         { id: "main", label: "Pilotage" },
+        { id: "challenge", label: "Challenge" },
         { id: "account", label: "Compte" },
       ]}
       user={{ name: session.user.name, email: session.user.email, role: ROLE_LABELS[role as Role] }}

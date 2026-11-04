@@ -7,11 +7,11 @@ import type { Metadata } from "next";
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://kraken.hustlerlabs.tech").replace(/\/$/, "");
 
 export const SITE = {
-  name: "Kraken : Sold Out",
+  name: "Kraken",
   shortName: "Kraken",
   tagline: "Votre back-end. Sous pression.",
   description:
-    "Défi back-end de HustlerLabs : construisez la billetterie qui tient quand tout le monde veut le dernier billet. 100 places, 2 000 FCFA, solo, langage libre, 21 jours.",
+    "Kraken, défi back-end de HustlerLabs. Pour l'édition 01, thème Sold Out : construisez la billetterie qui tient quand tout le monde veut le dernier billet. 100 places, 2 000 FCFA, solo, langage libre, 21 jours.",
   locale: "fr_FR",
   organizer: "HustlerLabs",
   keywords: [

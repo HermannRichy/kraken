@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BookOpen, CreditCard, ExternalLink, House, KeyRound, LayoutDashboard, Lock, LogOut, Menu, Settings, ShieldCheck, UserCog, UserRound, Users, X, type LucideIcon } from "lucide-react";
+import { Bell, BookOpen, ClipboardCheck, CreditCard, ExternalLink, FileStack, House, KeyRound, LayoutDashboard, Lock, LogOut, Menu, Settings, ShieldCheck, UserCog, UserRound, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
@@ -19,6 +19,8 @@ const ICONS = {
   payment: CreditCard,
   keys: KeyRound,
   docs: BookOpen,
+  resources: FileStack,
+  submissions: ClipboardCheck,
   bell: Bell,
   user: UserRound,
 } satisfies Record<string, LucideIcon>;
